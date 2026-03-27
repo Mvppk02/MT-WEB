@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+
+  <script>
+    function lt()
+      
+    {
+      let handellist=[];
+      let vare = document.createElement("li");
+      vare.innerHTML = document.getElementById("input").value;
+      handellist.push(vare)
+      console.log(handellist)
+      console.log(vare.innerHTML);
+      document.getElementById("lister").appendChild(vare);
+    }
+
+    function slett()
+    {
+      handellist.splice(vare-1,document.getElementById("input").value);
+    }
+  </script>
+</head>
+<body>
+  <div">
+    <button 
+      onclick="lt()">legg til
+    </button>
+    <button
+      onclick="slett()">slett
+    </button>
+      <label for="input">Søk her →</label>
+      <input style="margin-left: 35px;" type="text" id="input">
+      <ol 
+      style="border: solid black; width: 150px; height: fit-content;" id="lister">
+      </ol>
+    </div>
+</body>
+</html>

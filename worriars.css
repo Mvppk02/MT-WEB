@@ -1,0 +1,32 @@
+.body1
+{
+ background-color:  linear-gradient(blue, pink);;
+}
+
+h1
+{
+  font-style: italic;
+  text-align: center;
+}
+img
+{
+  height: 200px;
+  width: 200x;
+  align-items: center;
+  border: double;
+}
+.cont
+{
+  margin-top: 75px;
+  height: 400px;
+  
+}
+p
+{
+  font-size: medium;
+}
+button:hover
+{
+background-color: blue;
+color: white;
+}

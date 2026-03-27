@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script>
+      window.onload = oppstart
+      function oppstart()
+      {
+        for(var i =1; i<4; i++)
+        {
+          console.log(i);
+          document.getElementById("utskrift1").innerHTML=i;
+          document.createElement("tryit").innerHTML =i;
+          console.log("tryit")
+          
+          for(var j =1; j<4; j++)
+          {
+            console.log(j);
+            document.getElementById("utskrift2").innerHTML=j;
+          }
+        }
+      }
+      
+      
+    </script>
+    <script>
+      window.onload = gjenta
+      
+      let kolone = prompt("taste inn kolone verdi");
+      let rad =prompt("taste inn rad verdi");
+      let htmltext = "";
+      function gjenta()
+      {
+       
+        for(i=0; i<kolone; i++)
+        {
+        for(j=0; j<rad; j++)
+         
+        {
+          htmltext += "<img src='emoji1.png'>";
+          console.log(i);
+          document.getElementById("bilder").innerHTML = htmltext;
+         }
+         
+         htmltext += "<br>";
+       }
+      
+      }
+    </script>
+  </head>
+  <body>
+    <button onclick="oppstart()">start</button>
+    <button onclick="gjenta()">start2</button>
+    <p id="utskrift1"></p>
+    <p id="utskrift2"></p>
+    <div id="bilder" style="width: 100px; height: 30px;"></div>
+  </body>
+</html>

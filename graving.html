@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+  <link rel="stylesheet" href="graving.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <div id="b1">
+    <button class="bt" onclick="convers()">start</button>
+  </div>
+  <div id="divc">
+    <input placeholder="skrive inn her" id="input1">
+  </div>
+
+  <div class="skriveut">
+    <ol id="skrive"></ol>
+  </div>
+
+   <script>
+    function convers()
+    {
+     oppstart();
+    }
+
+    function oppstart()
+    {
+      let tekst = document.getElementById("input1").value;
+      console.log(tekst);
+      document.createElement("li");
+    }
+   </script>
+
+</body>
+</html>

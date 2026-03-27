@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<HTML>
+  <head>
+    <style>
+     
+    </style>
+  </head>
+  
+  <body id="body1">
+    
+    <div class="div1">
+      <div>
+        <p id="text1"></p>
+        <label for="username1">username</label>
+        <input type="text" id="username1">
+      </div>
+      <div>
+        <label for="password1">password</label>
+        <input type="text" id="password1">
+      </div>
+      <div>
+        <button type="button" onclick="onecall()">send</button>
+      </div>
+      <p id="prex1">waiting.....</p>
+      <div></div>
+    </div>
+    
+    <script>
+      function onecall(){ 
+        let userName = document.getElementById("username1").value;
+        let passWord = document.getElementById("password1").value;
+        //let sum1 = userName + passWord;
+        //alert(sum1)
+          if (userName == "123" && passWord == "1234"){
+            document.getElementById("prex1").innerHTML = "accepted";
+          }  else if(userName == "1234" && passWord == "123") {
+            document.body.style.backgroundColor = "white";
+          } else if (userName == "123" && passWord == "123"){
+            document.body.style.backgroundColor = "black";
+          }else{
+            alert("du er ikke vellkommeden")
+          }
+      }
+      
+    </script>
+  </body>
+</HTML>
