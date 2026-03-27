@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+
+  <script>
+    
+      let handellist =[];
+      const KEY = "LAGRING";
+    function oppstart()
+    {
+      let vare = document.createElement("li");
+      vare.innerHTML = document.getElementById("input").value;
+      document.getElementById("liste").appendChild(vare);
+      handellist.push(vare.innerHTML);
+      oppdaterliste();
+    }
+
+    function slett()
+    {
+      let vareNummer = document.getElementById("input").value;
+      handellist.splice(vareNummer-1,handellist.length);
+
+      console.log("slett-testing");
+    }
+
+    
+    function oppdaterliste()
+    {
+      for (let i=0;i<handellist.length;i++)
+      {
+        let li = document.createElement("li");
+        li.textContent = document.getElementById("input").value;
+        liste.appendChild(li);
+        console.log("ol"+li.textContent);
+        
+      }
+    }
+
+    function lagre()
+    {
+      localStorage.setItem(handellist);
+
+    }
+
+
+
+  </script>
+
+</head>
+<body>
+  <button onclick="oppstart()">legg til</button>
+  <button onclick="slett()">slette</button>
+  <button>hente data</button>
+  <input type="text"id="input">
+  <ol id="liste"></ol>
+</body>
+</html>

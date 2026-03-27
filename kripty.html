@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="krypt.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+
+  <script>
+     function starter()
+     {
+      let tekst = String.fromCodePoint(document.getElementById("input").value);
+      document.getElementById("output").value = tekst;
+      console.log(tekst);
+
+     }
+     
+     function tekste()
+     {
+      let tekst = document.getElementById("input2").value.charCodeAt(0)
+      document.getElementById("output").value = tekst;
+      console.log(tekst);
+     }
+  </script>
+</head>
+<body>
+  <div>
+    <div>
+      
+    
+  <label for="input2">input2</label>
+  <input type="text" id="input">
+  <button onclick="starter()">Til Tekst</button>
+  <output id="output"></output>
+    </div>
+  </div>
+  <div>
+    <div>
+      
+    
+  <button onclick="tekste()">Til TALL</button>
+  <label for="input2">input2</label>
+  <input type="text" id="input2">
+    </div>
+  </div>
+</body>
+</html>

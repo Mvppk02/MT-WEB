@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script>
+    function oppstart() {
+    var tekst = "";
+    for (var antall = 5; antall >= 1; antall--) {
+    tekst += antall + " little monkeys jumping on the bed,<br />";
+    tekst += "One fell out and bumped his head;<br />";
+    tekst += "Momma called the doctor, the doctor said,<br />";
+    tekst += "That’s what you get for jumping on the bed!<br />";
+    tekst += (antall-1) + " little monkeys jumping on the bed!<br /><br />";
+
+    if(antall > 1) {
+    tekst += (antall-1) + " little monkeys jumping on the bed!<br /><br />";
+    }
+    else {
+    tekst += "Put those monkeys straight to bed!<br /><br />";
+    }
+    }
+
+    document.getElementById("utskrift").innerHTML = tekst;
+    }
+    </script> 
+  </head>
+  <body>
+    <button style="font-weight: bold;" onclick="oppstart()">press to start</button>
+      <p id="utskrift"></p>
+  </body>
+</html>

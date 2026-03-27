@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="conve.css">
+    <script>
+      function rentekalku(){
+        let belop = parseFloat(document.getElementById("bt1").value);
+        let rente = parseFloat(document.getElementById("bt2").value);
+        let ar = parseInt(document.getElementById("bt3").value);
+        
+        if(isNaN(belop) || isNaN(rente) || isNaN(ar)) {
+          document.getElementById("resultat").innerHTML = "Vennligst fyll inn alle felt";
+          return;
+        }
+        
+        let saldo = belop;
+        for(let i = 0; i < ar; i++){
+          saldo = saldo * (1 + rente/100);
+        }
+        
+        document.getElementById("resultat").innerHTML = "Resultat: " + saldo.toFixed(2);
+      }
+    </script>
+  </head>
+  <body class="b-key">
+    <label for="bt1">Beløp</label>
+    <input type="number" id="bt1" style="width: 100px; height: 30px;" placeholder="0"><br><br>
+    <label for="bt2">Rente</label>
+    <input type="number" id="bt2" style="width: 100px; height: 30px;" placeholder="0" step="0.01"><br><br>
+    <label for="bt3">År</label>
+    <input type="number" id="bt3" style="width: 100px; height: 30px;" placeholder="0"><br><br>
+    <button onclick="rentekalku()" style="width: 100px; height: 40px;">Kalkuler</button><br><br>
+    <div id="resultat" style="font-weight: bold; font-size: 18px;"></div>
+  </body>
+</html>

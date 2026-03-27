@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+
+  <script>
+    let userName = ['admin','','axel'];
+    let pass = ['321','123','lexa'];
+    function authernticate()
+    {
+      userName.innerHTML = document.getElementById("enter user").value;
+      pass.innerHTML = document.getElementById("enter pass").value;
+      
+      userName.push(userName.innerHTML);
+      pass.push(pass.innerHTML);
+      
+      console.log(userName[0], ' ',pass[1])
+      
+      if(userName == [0] && pass == [2])
+      {
+        document.getElementById("output").innerHTML = "wellcom back, admin";
+        console.log(userName);
+        console.log("test if")
+      } else
+      {
+        document.getElementById("output").innerHTML = "wellcome";
+        console.log("vannlige");
+      }
+    }
+  </script>
+</head>
+<body>
+  <div> 
+    <h3>register</h3>
+    <label for="enter user"></label>
+     <input type="text" id="enter user">
+     <label for="enter pass"></label>
+     <input type="text" id="enter pass">
+    
+  </div>
+  
+  <div>
+    
+  <label for="user">Username</label>
+  <input type="text" id="user">
+  <div>
+    
+  
+  </div>
+  <label for="pwd">Password</label>
+  <input type="text" id="pwd">
+  </div>
+  <button onclick="authernticate()"><b>Login</b></button>
+  <output id="output"></output>
+</body>
+</html>
