@@ -40,6 +40,263 @@
             margin-bottom: 28px;
         }
 
+        /* ---- Settings Button ---- */
+        .settings-btn {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            width: 40px;
+            height: 40px;
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            color: #8b949e;
+            font-size: 1.1rem;
+            cursor: pointer;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+        }
+
+        .settings-btn:hover {
+            border-color: #58a6ff;
+            color: #58a6ff;
+            background: #1c2128;
+        }
+
+        /* ---- Settings Panel ---- */
+        .settings-panel {
+            position: fixed;
+            top: 0;
+            right: -420px;
+            width: 400px;
+            height: 100vh;
+            background: #0d1117;
+            border-left: 1px solid #21262d;
+            z-index: 200;
+            transition: right 0.2s ease;
+            overflow-y: auto;
+            box-shadow: -8px 0 24px rgba(0,0,0,0.4);
+        }
+
+        .settings-panel.open {
+            right: 0;
+        }
+
+        .settings-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 150;
+            display: none;
+        }
+
+        .settings-overlay.open {
+            display: block;
+        }
+
+        .settings-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #21262d;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            background: #0d1117;
+            z-index: 10;
+        }
+
+        .settings-header h2 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #e6edf3;
+        }
+
+        .settings-close {
+            background: none;
+            border: none;
+            color: #484f58;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .settings-close:hover {
+            color: #c9d1d9;
+            background: #21262d;
+        }
+
+        .settings-body {
+            padding: 16px 24px 40px;
+        }
+
+        /* ---- Toggle Groups ---- */
+        .toggle-section {
+            margin-bottom: 20px;
+        }
+
+        .toggle-section-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #21262d;
+        }
+
+        .toggle-section-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #8b949e;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            flex: 1;
+        }
+
+        .toggle-section-all {
+            font-size: 0.7rem;
+            color: #484f58;
+            background: none;
+            border: 1px solid #30363d;
+            padding: 2px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .toggle-section-all:hover {
+            color: #58a6ff;
+            border-color: #58a6ff;
+        }
+
+        .toggle-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 8px;
+            border-radius: 4px;
+            transition: background 0.1s;
+        }
+
+        .toggle-item:hover {
+            background: #161b22;
+        }
+
+        .toggle-label {
+            font-size: 0.85rem;
+            color: #c9d1d9;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toggle-count {
+            font-size: 0.65rem;
+            color: #484f58;
+            background: #161b22;
+            padding: 1px 5px;
+            border-radius: 3px;
+        }
+
+        /* ---- Toggle Switch ---- */
+        .switch {
+            position: relative;
+            width: 32px;
+            height: 18px;
+            flex-shrink: 0;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            inset: 0;
+            background: #30363d;
+            border-radius: 9px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .slider::before {
+            content: '';
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            left: 2px;
+            bottom: 2px;
+            background: #8b949e;
+            border-radius: 50%;
+            transition: transform 0.15s, background 0.15s;
+        }
+
+        .switch input:checked + .slider {
+            background: rgba(88, 166, 255, 0.3);
+        }
+
+        .switch input:checked + .slider::before {
+            transform: translateX(14px);
+            background: #58a6ff;
+        }
+
+        /* ---- Global Actions ---- */
+        .settings-actions {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #21262d;
+        }
+
+        .settings-action-btn {
+            flex: 1;
+            padding: 8px;
+            font-size: 0.78rem;
+            font-weight: 500;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s;
+            text-align: center;
+        }
+
+        .btn-show-all {
+            background: rgba(88, 166, 255, 0.1);
+            border: 1px solid rgba(88, 166, 255, 0.3);
+            color: #58a6ff;
+        }
+
+        .btn-show-all:hover {
+            background: rgba(88, 166, 255, 0.2);
+        }
+
+        .btn-hide-all {
+            background: rgba(248, 81, 73, 0.1);
+            border: 1px solid rgba(248, 81, 73, 0.3);
+            color: #f85149;
+        }
+
+        .btn-hide-all:hover {
+            background: rgba(248, 81, 73, 0.2);
+        }
+
+        .btn-export {
+            background: #161b22;
+            border: 1px solid #30363d;
+            color: #8b949e;
+        }
+
+        .btn-export:hover {
+            border-color: #58a6ff;
+            color: #58a6ff;
+        }
+
         /* ---- Search ---- */
         .search-wrap {
             max-width: 480px;
@@ -103,6 +360,10 @@
             margin-bottom: 52px;
         }
 
+        .section.hidden-section {
+            display: none;
+        }
+
         .section-header {
             display: flex;
             align-items: center;
@@ -112,9 +373,7 @@
             border-bottom: 1px solid #21262d;
         }
 
-        .section-icon {
-            font-size: 1.2rem;
-        }
+        .section-icon { font-size: 1.2rem; }
 
         .section-title {
             font-size: 1.15rem;
@@ -147,9 +406,11 @@
             transition: border-color 0.15s;
         }
 
-        .subfolder:hover {
-            border-color: #30363d;
+        .subfolder.hidden-subfolder {
+            display: none;
         }
+
+        .subfolder:hover { border-color: #30363d; }
 
         .subfolder-header {
             padding: 12px 16px;
@@ -177,9 +438,7 @@
         }
 
         /* ---- File List ---- */
-        .file-list {
-            padding: 8px;
-        }
+        .file-list { padding: 8px; }
 
         .file-item {
             display: flex;
@@ -192,9 +451,7 @@
             transition: background 0.1s;
         }
 
-        .file-item:hover {
-            background: #21262d;
-        }
+        .file-item:hover { background: #21262d; }
 
         .file-ext {
             font-size: 0.65rem;
@@ -234,10 +491,7 @@
             font-size: 0.95rem;
         }
 
-        .no-results-icon {
-            font-size: 2rem;
-            margin-bottom: 12px;
-        }
+        .no-results-icon { font-size: 2rem; margin-bottom: 12px; }
 
         footer {
             text-align: center;
@@ -245,9 +499,64 @@
             font-size: 0.78rem;
             margin-top: 80px;
         }
+
+        /* ---- Toast ---- */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-size: 0.85rem;
+            color: #c9d1d9;
+            z-index: 300;
+            transition: transform 0.3s ease;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
     </style>
 </head>
 <body>
+
+    <!-- Settings Button -->
+    <button class="settings-btn" id="settingsBtn" title="Visibility settings">⚙</button>
+
+    <!-- Settings Overlay -->
+    <div class="settings-overlay" id="settingsOverlay"></div>
+
+    <!-- Settings Panel -->
+    <div class="settings-panel" id="settingsPanel">
+        <div class="settings-header">
+            <h2>👁 Visibility Controls</h2>
+            <button class="settings-close" id="settingsClose">✕</button>
+        </div>
+        <div class="settings-body">
+
+            <div class="settings-actions">
+                <button class="settings-action-btn btn-show-all" id="btnShowAll">Show All</button>
+                <button class="settings-action-btn btn-hide-all" id="btnHideAll">Hide All</button>
+            </div>
+
+            <!-- Toggles will be injected here by JS -->
+            <div id="togglesContainer"></div>
+
+            <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #21262d;">
+                <button class="settings-action-btn btn-export" id="btnExport" style="width:100%;">📋 Copy Config to Clipboard</button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <!-- Main Content -->
     <div class="wrap">
 
         <header>
@@ -270,103 +579,60 @@
                 <div class="section-header">
                     <span class="section-icon">📄</span>
                     <span class="section-title">Pages</span>
-                    <span class="section-count">4 subfolders</span>
+                    <span class="section-count">4 folders</span>
                 </div>
                 <div class="subfolders">
 
-                    <!-- Subfolder: Root -->
-                    <div class="subfolder" data-name="root pages">
+                    <div class="subfolder" data-subfolder="pages-root">
                         <div class="subfolder-header">
                             <span class="subfolder-icon">📂</span>
                             <span class="subfolder-name">Root</span>
-                            <span class="subfolder-file-count">3 files</span>
+                            <span class="subfolder-file-count">3</span>
                         </div>
                         <div class="file-list">
-                            <a class="file-item" href="/changecolor.html" data-search="changecolor html root page color">
-                                <span class="file-ext html">html</span>
-                                <span class="file-name">Change Color</span>
-                            </a>
-                            <a class="file-item" href="/nyeark.html" data-search="nyeark html root page year calendar">
-                                <span class="file-ext html">html</span>
-                                <span class="file-name">Nyeark</span>
-                            </a>
-                            <a class="file-item" href="/sendtall.htm" data-search="sendtall htm root page send number data">
-                                <span class="file-ext htm">htm</span>
-                                <span class="file-name">Sendtall</span>
-                            </a>
+                            <a class="file-item" href="/changecolor.html" data-search="changecolor html root page color"><span class="file-ext html">html</span><span class="file-name">Change Color</span></a>
+                            <a class="file-item" href="/nyeark.html" data-search="nyeark html root page year calendar"><span class="file-ext html">html</span><span class="file-name">Nyeark</span></a>
+                            <a class="file-item" href="/sendtall.htm" data-search="sendtall htm root page send number data"><span class="file-ext htm">htm</span><span class="file-name">Sendtall</span></a>
                         </div>
                     </div>
 
-                    <!-- Subfolder: Dashboard -->
-                    <div class="subfolder" data-name="dashboard">
+                    <div class="subfolder" data-subfolder="pages-dashboard">
                         <div class="subfolder-header">
                             <span class="subfolder-icon">📊</span>
                             <span class="subfolder-name">Dashboard</span>
-                            <span class="subfolder-file-count">2 files</span>
+                            <span class="subfolder-file-count">2</span>
                         </div>
                         <div class="file-list">
-                            <a class="file-item" href="/SCRIPTS/nve-reservoir-dashboard.html" data-search="nve reservoir dashboard html water statistics chart">
-                                <span class="file-ext html">html</span>
-                                <span class="file-name">NVE Reservoir Dashboard</span>
-                            </a>
-                            <a class="file-item" href="/SCRIPTS/reservoir-dashboard.html" data-search="reservoir dashboard html data visualization statistics">
-                                <span class="file-ext html">html</span>
-                                <span class="file-name">Reservoir Dashboard</span>
-                            </a>
+                            <a class="file-item" href="/SCRIPTS/nve-reservoir-dashboard.html" data-search="nve reservoir dashboard html water statistics chart"><span class="file-ext html">html</span><span class="file-name">NVE Reservoir Dashboard</span></a>
+                            <a class="file-item" href="/SCRIPTS/reservoir-dashboard.html" data-search="reservoir dashboard html data visualization statistics"><span class="file-ext html">html</span><span class="file-name">Reservoir Dashboard</span></a>
                         </div>
                     </div>
 
-                    <!-- Subfolder: Tools -->
-                    <div class="subfolder" data-name="tools">
+                    <div class="subfolder" data-subfolder="pages-tools">
                         <div class="subfolder-header">
                             <span class="subfolder-icon">🔧</span>
                             <span class="subfolder-name">Tools</span>
-                            <span class="subfolder-file-count">4 files</span>
+                            <span class="subfolder-file-count">4</span>
                         </div>
                         <div class="file-list">
-                            <a class="file-item" href="/SCRIPTS/kalkulator.html" data-search="kalkulator html calculator tool math">
-                                <span class="file-ext html">html</span>
-                                <span class="file-name">Kalkulator</span>
-                            </a>
-                            <a class="file-item" href="/SCRIPTS/converter.html" data-search="converter html tool unit data convert">
-                                <span class="file-ext html">html</span>
-                                <span class="file-name">Converter</span>
-                            </a>
-                            <a class="file-item" href="/SCRIPTS/calc.html" data-search="calc html calculator simple math">
-                                <span class="file-ext html">html</span>
-                                <span class="file-name">Calc</span>
-                            </a>
-                            <a class="file-item" href="/html-folder/calc.html" data-search="calc html calculator tool interactive">
-                                <span class="file-ext html">html</span>
-                                <span class="file-name">Calculator</span>
-                            </a>
+                            <a class="file-item" href="/SCRIPTS/kalkulator.html" data-search="kalkulator html calculator tool math"><span class="file-ext html">html</span><span class="file-name">Kalkulator</span></a>
+                            <a class="file-item" href="/SCRIPTS/converter.html" data-search="converter html tool unit data convert"><span class="file-ext html">html</span><span class="file-name">Converter</span></a>
+                            <a class="file-item" href="/SCRIPTS/calc.html" data-search="calc html calculator simple math"><span class="file-ext html">html</span><span class="file-name">Calc</span></a>
+                            <a class="file-item" href="/html-folder/calc.html" data-search="calc html calculator tool interactive"><span class="file-ext html">html</span><span class="file-name">Calculator</span></a>
                         </div>
                     </div>
 
-                    <!-- Subfolder: General -->
-                    <div class="subfolder" data-name="general">
+                    <div class="subfolder" data-subfolder="pages-general">
                         <div class="subfolder-header">
                             <span class="subfolder-icon">📁</span>
                             <span class="subfolder-name">General</span>
-                            <span class="subfolder-file-count">4 files</span>
+                            <span class="subfolder-file-count">4</span>
                         </div>
                         <div class="file-list">
-                            <a class="file-item" href="/SCRIPTS/project.html" data-search="project html general demo">
-                                <span class="file-ext html">html</span>
-                                <span class="file-name">Project</span>
-                            </a>
-                            <a class="file-item" href="/SCRIPTS/Db.html" data-search="db html database data browse">
-                                <span class="file-ext html">html</span>
-                                <span class="file-name">Db</span>
-                            </a>
-                            <a class="file-item" href="/SCRIPTS/FT.html" data-search="ft html featured file tool">
-                                <span class="file-ext html">html</span>
-                                <span class="file-name">FT</span>
-                            </a>
-                            <a class="file-item" href="/SCRIPTS/hei.html" data-search="hei html hello greeting page">
-                                <span class="file-ext html">html</span>
-                                <span class="file-name">Hei</span>
-                            </a>
+                            <a class="file-item" href="/SCRIPTS/project.html" data-search="project html general demo"><span class="file-ext html">html</span><span class="file-name">Project</span></a>
+                            <a class="file-item" href="/SCRIPTS/Db.html" data-search="db html database data browse"><span class="file-ext html">html</span><span class="file-name">Db</span></a>
+                            <a class="file-item" href="/SCRIPTS/FT.html" data-search="ft html featured file tool"><span class="file-ext html">html</span><span class="file-name">FT</span></a>
+                            <a class="file-item" href="/SCRIPTS/hei.html" data-search="hei html hello greeting page"><span class="file-ext html">html</span><span class="file-name">Hei</span></a>
                         </div>
                     </div>
 
@@ -378,107 +644,61 @@
                 <div class="section-header">
                     <span class="section-icon">🌐</span>
                     <span class="section-title">HTMLS</span>
-                    <span class="section-count">4 subfolders</span>
+                    <span class="section-count">4 folders</span>
                 </div>
                 <div class="subfolders">
 
-                    <!-- Subfolder: Main -->
-                    <div class="subfolder" data-name="htmls main htmls">
+                    <div class="subfolder" data-subfolder="htmls-main">
                         <div class="subfolder-header">
                             <span class="subfolder-icon">📂</span>
                             <span class="subfolder-name">Main</span>
-                            <span class="subfolder-file-count">3 files</span>
+                            <span class="subfolder-file-count">3</span>
                         </div>
                         <div class="file-list">
-                            <a class="file-item" href="/HTMLS/index.html" data-search="htmls index html home landing mvppk project hub">
-                                <span class="file-ext html">html</span>
-                                <span class="file-name">HTMLS Home</span>
-                            </a>
-                            <a class="file-item" href="/HTMLS/myani2.html" data-search="htmls myani2 html animation css visual effect">
-                                <span class="file-ext html">html</span>
-                                <span class="file-name">My Animation 2</span>
-                            </a>
-                            <a class="file-item" href="/HTMLS/style.css" data-search="htmls style css stylesheet main design">
-                                <span class="file-ext css">css</span>
-                                <span class="file-name">style.css</span>
-                            </a>
+                            <a class="file-item" href="/HTMLS/index.html" data-search="htmls index html home landing mvppk project hub"><span class="file-ext html">html</span><span class="file-name">HTMLS Home</span></a>
+                            <a class="file-item" href="/HTMLS/myani2.html" data-search="htmls myani2 html animation css visual effect"><span class="file-ext html">html</span><span class="file-name">My Animation 2</span></a>
+                            <a class="file-item" href="/HTMLS/style.css" data-search="htmls style css stylesheet main design"><span class="file-ext css">css</span><span class="file-name">style.css</span></a>
                         </div>
                     </div>
 
-                    <!-- Subfolder: Graving Design -->
-                    <div class="subfolder" data-name="graving design art">
+                    <div class="subfolder" data-subfolder="htmls-design">
                         <div class="subfolder-header">
                             <span class="subfolder-icon">🎨</span>
                             <span class="subfolder-name">Graving &amp; Design</span>
-                            <span class="subfolder-file-count">3 files</span>
+                            <span class="subfolder-file-count">3</span>
                         </div>
                         <div class="file-list">
-                            <a class="file-item" href="/html-folder/graving.html" data-search="html graving html design showcase creative artwork artistic">
-                                <span class="file-ext html">html</span>
-                                <span class="file-name">Graving</span>
-                            </a>
-                            <a class="file-item" href="/html-folder/graving.css" data-search="html graving css stylesheet design artwork">
-                                <span class="file-ext css">css</span>
-                                <span class="file-name">graving.css</span>
-                            </a>
-                            <a class="file-item" href="/html-folder/ani2.css" data-search="html ani2 css animation style design">
-                                <span class="file-ext css">css</span>
-                                <span class="file-name">ani2.css</span>
-                            </a>
+                            <a class="file-item" href="/html-folder/graving.html" data-search="html graving html design showcase creative artwork artistic"><span class="file-ext html">html</span><span class="file-name">Graving</span></a>
+                            <a class="file-item" href="/html-folder/graving.css" data-search="html graving css stylesheet design artwork"><span class="file-ext css">css</span><span class="file-name">graving.css</span></a>
+                            <a class="file-item" href="/HTMLS/ani2.css" data-search="html ani2 css animation style design"><span class="file-ext css">css</span><span class="file-name">ani2.css</span></a>
                         </div>
                     </div>
 
-                    <!-- Subfolder: Scripts -->
-                    <div class="subfolder" data-name="html scripts html javascript">
+                    <div class="subfolder" data-subfolder="htmls-scripts">
                         <div class="subfolder-header">
                             <span class="subfolder-icon">📜</span>
                             <span class="subfolder-name">Scripts &amp; Code</span>
-                            <span class="subfolder-file-count">4 files</span>
+                            <span class="subfolder-file-count">4</span>
                         </div>
                         <div class="file-list">
-                            <a class="file-item" href="/html-folder/JAVASCRIPT.HTML" data-search="javascript html code programming interactive example">
-                                <span class="file-ext html">html</span>
-                                <span class="file-name">JavaScript</span>
-                            </a>
-                            <a class="file-item" href="/html-folder/script/script.html" data-search="script html code page interactive">
-                                <span class="file-ext html">html</span>
-                                <span class="file-name">script.html</span>
-                            </a>
-                            <a class="file-item" href="/html-folder/script/script.css" data-search="script css stylesheet code style">
-                                <span class="file-ext css">css</span>
-                                <span class="file-name">script.css</span>
-                            </a>
-                            <a class="file-item" href="/SCRIPTS/JAVASCRIPT.HTML" data-search="javascript html code demo example interactive">
-                                <span class="file-ext html">html</span>
-                                <span class="file-name">JAVASCRIPT</span>
-                            </a>
+                            <a class="file-item" href="/html-folder/JAVASCRIPT.HTML" data-search="javascript html code programming interactive example"><span class="file-ext html">html</span><span class="file-name">JavaScript</span></a>
+                            <a class="file-item" href="/html-folder/script/script.html" data-search="script html code page interactive"><span class="file-ext html">html</span><span class="file-name">script.html</span></a>
+                            <a class="file-item" href="/html-folder/script/script.css" data-search="script css stylesheet code style"><span class="file-ext css">css</span><span class="file-name">script.css</span></a>
+                            <a class="file-item" href="/SCRIPTS/JAVASCRIPT.HTML" data-search="javascript html code demo example interactive"><span class="file-ext html">html</span><span class="file-name">JAVASCRIPT</span></a>
                         </div>
                     </div>
 
-                    <!-- Subfolder: Animation -->
-                    <div class="subfolder" data-name="animation ani motion">
+                    <div class="subfolder" data-subfolder="htmls-animation">
                         <div class="subfolder-header">
                             <span class="subfolder-icon">🎬</span>
                             <span class="subfolder-name">Animation</span>
-                            <span class="subfolder-file-count">4 files</span>
+                            <span class="subfolder-file-count">4</span>
                         </div>
                         <div class="file-list">
-                            <a class="file-item" href="/html-folder/script/ANIMATION/myani.html" data-search="animation myani html motion visual effect">
-                                <span class="file-ext html">html</span>
-                                <span class="file-name">myani.html</span>
-                            </a>
-                            <a class="file-item" href="/html-folder/script/ANIMATION/myani2.html" data-search="animation myani2 html motion visual effect second">
-                                <span class="file-ext html">html</span>
-                                <span class="file-name">myani2.html</span>
-                            </a>
-                            <a class="file-item" href="/html-folder/script/ANIMATION/test.html" data-search="animation test html experiment motion">
-                                <span class="file-ext html">html</span>
-                                <span class="file-name">test.html</span>
-                            </a>
-                            <a class="file-item" href="/html-folder/script/ANIMATION/stil.css" data-search="animation stil css stylesheet motion style">
-                                <span class="file-ext css">css</span>
-                                <span class="file-name">stil.css</span>
-                            </a>
+                            <a class="file-item" href="/html-folder/script/ANIMATION/myani.html" data-search="animation myani html motion visual effect"><span class="file-ext html">html</span><span class="file-name">myani.html</span></a>
+                            <a class="file-item" href="/html-folder/script/ANIMATION/myani2.html" data-search="animation myani2 html motion visual effect second"><span class="file-ext html">html</span><span class="file-name">myani2.html</span></a>
+                            <a class="file-item" href="/html-folder/script/ANIMATION/test.html" data-search="animation test html experiment motion"><span class="file-ext html">html</span><span class="file-name">test.html</span></a>
+                            <a class="file-item" href="/html-folder/script/ANIMATION/stil.css" data-search="animation stil css stylesheet motion style"><span class="file-ext css">css</span><span class="file-name">stil.css</span></a>
                         </div>
                     </div>
 
@@ -490,119 +710,64 @@
                 <div class="section-header">
                     <span class="section-icon">🚀</span>
                     <span class="section-title">Projects</span>
-                    <span class="section-count">4 subfolders</span>
+                    <span class="section-count">4 folders</span>
                 </div>
                 <div class="subfolders">
 
-                    <!-- Subfolder: Games -->
-                    <div class="subfolder" data-name="game spill gaming">
+                    <div class="subfolder" data-subfolder="projects-games">
                         <div class="subfolder-header">
                             <span class="subfolder-icon">🎮</span>
                             <span class="subfolder-name">Games</span>
-                            <span class="subfolder-file-count">5 files</span>
+                            <span class="subfolder-file-count">5</span>
                         </div>
                         <div class="file-list">
-                            <a class="file-item" href="/SCRIPTS/spill.html" data-search="spill html game interactive browser gaming">
-                                <span class="file-ext html">html</span>
-                                <span class="file-name">Spill</span>
-                            </a>
-                            <a class="file-item" href="/SCRIPTS/myspill.html" data-search="myspill html game personal css gameplay">
-                                <span class="file-ext html">html</span>
-                                <span class="file-name">My Spill</span>
-                            </a>
-                            <a class="file-item" href="/SCRIPTS/try-hard.html" data-search="try-hard html challenge mode game skill test">
-                                <span class="file-ext html">html</span>
-                                <span class="file-name">Try Hard</span>
-                            </a>
-                            <a class="file-item" href="/SCRIPTS/ai spill.html" data-search="ai spill html artificial intelligence game project">
-                                <span class="file-ext html">html</span>
-                                <span class="file-name">AI Spill</span>
-                            </a>
-                            <a class="file-item" href="/SCRIPTS/monkeyusic.html" data-search="monkeyusic html music game audio interactive">
-                                <span class="file-ext html">html</span>
-                                <span class="file-name">Monkey Music</span>
-                            </a>
+                            <a class="file-item" href="/SCRIPTS/spill.html" data-search="spill html game interactive browser gaming"><span class="file-ext html">html</span><span class="file-name">Spill</span></a>
+                            <a class="file-item" href="/SCRIPTS/myspill.html" data-search="myspill html game personal css gameplay"><span class="file-ext html">html</span><span class="file-name">My Spill</span></a>
+                            <a class="file-item" href="/SCRIPTS/try-hard.html" data-search="try-hard html challenge mode game skill test"><span class="file-ext html">html</span><span class="file-name">Try Hard</span></a>
+                            <a class="file-item" href="/SCRIPTS/ai spill.html" data-search="ai spill html artificial intelligence game project"><span class="file-ext html">html</span><span class="file-name">AI Spill</span></a>
+                            <a class="file-item" href="/SCRIPTS/monkeyusic.html" data-search="monkeyusic html music game audio interactive"><span class="file-ext html">html</span><span class="file-name">Monkey Music</span></a>
                         </div>
                     </div>
 
-                    <!-- Subfolder: Crypto & Auth -->
-                    <div class="subfolder" data-name="crypto auth security encrypt">
+                    <div class="subfolder" data-subfolder="projects-crypto">
                         <div class="subfolder-header">
                             <span class="subfolder-icon">🔐</span>
                             <span class="subfolder-name">Crypto &amp; Auth</span>
-                            <span class="subfolder-file-count">3 files</span>
+                            <span class="subfolder-file-count">3</span>
                         </div>
                         <div class="file-list">
-                            <a class="file-item" href="/SCRIPTS/kripty.html" data-search="kripty html crypto cryptography encryption security concept">
-                                <span class="file-ext html">html</span>
-                                <span class="file-name">Kripty</span>
-                            </a>
-                            <a class="file-item" href="/SCRIPTS/authenticate.html" data-search="authenticate html auth login authentication flow">
-                                <span class="file-ext html">html</span>
-                                <span class="file-name">Authenticate</span>
-                            </a>
-                            <a class="file-item" href="/SCRIPTS/krypt.css" data-search="krypt css crypto style encryption design">
-                                <span class="file-ext css">css</span>
-                                <span class="file-name">krypt.css</span>
-                            </a>
+                            <a class="file-item" href="/SCRIPTS/kripty.html" data-search="kripty html crypto cryptography encryption security concept"><span class="file-ext html">html</span><span class="file-name">Kripty</span></a>
+                            <a class="file-item" href="/SCRIPTS/authenticate.html" data-search="authenticate html auth login authentication flow"><span class="file-ext html">html</span><span class="file-name">Authenticate</span></a>
+                            <a class="file-item" href="/SCRIPTS/krypt.css" data-search="krypt css crypto style encryption design"><span class="file-ext css">css</span><span class="file-name">krypt.css</span></a>
                         </div>
                     </div>
 
-                    <!-- Subfolder: Testing -->
-                    <div class="subfolder" data-name="testing experiment">
+                    <div class="subfolder" data-subfolder="projects-testing">
                         <div class="subfolder-header">
                             <span class="subfolder-icon">🧪</span>
                             <span class="subfolder-name">Testing</span>
-                            <span class="subfolder-file-count">4 files</span>
+                            <span class="subfolder-file-count">4</span>
                         </div>
                         <div class="file-list">
-                            <a class="file-item" href="/SCRIPTS/testing.html" data-search="testing html experimental playground idea technology">
-                                <span class="file-ext html">html</span>
-                                <span class="file-name">Testing</span>
-                            </a>
-                            <a class="file-item" href="/SCRIPTS/testsub.html" data-search="testsub html sub testing layout content experiment">
-                                <span class="file-ext html">html</span>
-                                <span class="file-name">Testsub</span>
-                            </a>
-                            <a class="file-item" href="/SCRIPTS/tesssting.hmtl" data-search="tesssting hmtl testing layout experiment custom">
-                                <span class="file-ext htm">hmtl</span>
-                                <span class="file-name">Tesssting</span>
-                            </a>
-                            <a class="file-item" href="/test.html" data-search="test html root experimental playground">
-                                <span class="file-ext html">html</span>
-                                <span class="file-name">Test</span>
-                            </a>
+                            <a class="file-item" href="/SCRIPTS/testing.html" data-search="testing html experimental playground idea technology"><span class="file-ext html">html</span><span class="file-name">Testing</span></a>
+                            <a class="file-item" href="/SCRIPTS/testsub.html" data-search="testsub html sub testing layout content experiment"><span class="file-ext html">html</span><span class="file-name">Testsub</span></a>
+                            <a class="file-item" href="/SCRIPTS/tesssting.hmtl" data-search="tesssting hmtl testing layout experiment custom"><span class="file-ext htm">hmtl</span><span class="file-name">Tesssting</span></a>
+                            <a class="file-item" href="/test.html" data-search="test html root experimental playground"><span class="file-ext html">html</span><span class="file-name">Test</span></a>
                         </div>
                     </div>
 
-                    <!-- Subfolder: Data & Logic -->
-                    <div class="subfolder" data-name="data arrays logic lists">
+                    <div class="subfolder" data-subfolder="projects-data">
                         <div class="subfolder-header">
                             <span class="subfolder-icon">📦</span>
                             <span class="subfolder-name">Data &amp; Logic</span>
-                            <span class="subfolder-file-count">5 files</span>
+                            <span class="subfolder-file-count">5</span>
                         </div>
                         <div class="file-list">
-                            <a class="file-item" href="/SCRIPTS/arrays.html" data-search="arrays html data structure array manipulation visualization">
-                                <span class="file-ext html">html</span>
-                                <span class="file-name">Arrays</span>
-                            </a>
-                            <a class="file-item" href="/SCRIPTS/123321.html" data-search="123321 html numbered data visualization page">
-                                <span class="file-ext html">html</span>
-                                <span class="file-name">123321</span>
-                            </a>
-                            <a class="file-item" href="/SCRIPTS/handellister.html" data-search="handellister html shopping list store listing data manage">
-                                <span class="file-ext html">html</span>
-                                <span class="file-name">Handellister</span>
-                            </a>
-                            <a class="file-item" href="/SCRIPTS/leggtil.html" data-search="leggtil html add append data entry tool">
-                                <span class="file-ext html">html</span>
-                                <span class="file-name">Leggtil</span>
-                            </a>
-                            <a class="file-item" href="/SCRIPTS/oppgave-script.html" data-search="oppgave-script html assignment task script school work">
-                                <span class="file-ext html">html</span>
-                                <span class="file-name">Oppgave Script</span>
-                            </a>
+                            <a class="file-item" href="/SCRIPTS/arrays.html" data-search="arrays html data structure array manipulation visualization"><span class="file-ext html">html</span><span class="file-name">Arrays</span></a>
+                            <a class="file-item" href="/SCRIPTS/123321.html" data-search="123321 html numbered data visualization page"><span class="file-ext html">html</span><span class="file-name">123321</span></a>
+                            <a class="file-item" href="/SCRIPTS/handellister.html" data-search="handellister html shopping list store listing data manage"><span class="file-ext html">html</span><span class="file-name">Handellister</span></a>
+                            <a class="file-item" href="/SCRIPTS/leggtil.html" data-search="leggtil html add append data entry tool"><span class="file-ext html">html</span><span class="file-name">Leggtil</span></a>
+                            <a class="file-item" href="/SCRIPTS/oppgave-script.html" data-search="oppgave-script html assignment task script school work"><span class="file-ext html">html</span><span class="file-name">Oppgave Script</span></a>
                         </div>
                     </div>
 
@@ -614,126 +779,71 @@
                 <div class="section-header">
                     <span class="section-icon">🖼️</span>
                     <span class="section-title">Media &amp; Data</span>
-                    <span class="section-count">4 subfolders</span>
+                    <span class="section-count">4 folders</span>
                 </div>
                 <div class="subfolders">
 
-                    <!-- Subfolder: Images -->
-                    <div class="subfolder" data-name="images pictures photos pics">
+                    <div class="subfolder" data-subfolder="media-images">
                         <div class="subfolder-header">
                             <span class="subfolder-icon">🖼️</span>
                             <span class="subfolder-name">Images</span>
-                            <span class="subfolder-file-count">5 files</span>
+                            <span class="subfolder-file-count">5</span>
                         </div>
                         <div class="file-list">
-                            <a class="file-item" href="/SCRIPTS/cat-gaming.png" data-search="cat gaming png image picture">
-                                <span class="file-ext img">png</span>
-                                <span class="file-name">cat-gaming.png</span>
-                            </a>
-                            <a class="file-item" href="/SCRIPTS/emoji1.png" data-search="emoji1 png emoji image picture">
-                                <span class="file-ext img">png</span>
-                                <span class="file-name">emoji1.png</span>
-                            </a>
-                            <a class="file-item" href="/SCRIPTS/emojit.png" data-search="emojit png emoji image picture">
-                                <span class="file-ext img">png</span>
-                                <span class="file-name">emojit.png</span>
-                            </a>
-                            <a class="file-item" href="/SCRIPTS/joker.png" data-search="joker png image picture card">
-                                <span class="file-ext img">png</span>
-                                <span class="file-name">joker.png</span>
-                            </a>
-                            <a class="file-item" href="/SCRIPTS/yt.jpg" data-search="yt jpg youtube image picture">
-                                <span class="file-ext img">jpg</span>
-                                <span class="file-name">yt.jpg</span>
-                            </a>
+                            <a class="file-item" href="/SCRIPTS/cat-gaming.png" data-search="cat gaming png image picture"><span class="file-ext img">png</span><span class="file-name">cat-gaming.png</span></a>
+                            <a class="file-item" href="/SCRIPTS/emoji1.png" data-search="emoji1 png emoji image picture"><span class="file-ext img">png</span><span class="file-name">emoji1.png</span></a>
+                            <a class="file-item" href="/SCRIPTS/emojit.png" data-search="emojit png emoji image picture"><span class="file-ext img">png</span><span class="file-name">emojit.png</span></a>
+                            <a class="file-item" href="/SCRIPTS/joker.png" data-search="joker png image picture card"><span class="file-ext img">png</span><span class="file-name">joker.png</span></a>
+                            <a class="file-item" href="/SCRIPTS/yt.jpg" data-search="yt jpg youtube image picture"><span class="file-ext img">jpg</span><span class="file-name">yt.jpg</span></a>
                         </div>
                     </div>
 
-                    <!-- Subfolder: GIFs & Banners -->
-                    <div class="subfolder" data-name="gifs banners large images">
+                    <div class="subfolder" data-subfolder="media-banners">
                         <div class="subfolder-header">
                             <span class="subfolder-icon">🎞️</span>
                             <span class="subfolder-name">GIFs &amp; Banners</span>
-                            <span class="subfolder-file-count">3 files</span>
+                            <span class="subfolder-file-count">3</span>
                         </div>
                         <div class="file-list">
-                            <a class="file-item" href="/SCRIPTS/GUc35AMWMAAVpBM.jpg" data-search="GUc35AMWMAAVpBM jpg image picture banner large">
-                                <span class="file-ext img">jpg</span>
-                                <span class="file-name">GUc35AMWMAAVpBM.jpg</span>
-                            </a>
-                            <a class="file-item" href="/html-folder/beatles.jpg" data-search="beatles jpg image picture music band">
-                                <span class="file-ext img">jpg</span>
-                                <span class="file-name">beatles.jpg</span>
-                            </a>
-                            <a class="file-item" href="/html-folder/8001252-015-nordic_apparel-boxer_samlet_web_1.png" data-search="nordic apparel boxer samlet web png image picture clothing brand">
-                                <span class="file-ext img">png</span>
-                                <span class="file-name">nordic_apparel-boxer.png</span>
-                            </a>
+                            <a class="file-item" href="/SCRIPTS/GUc35AMWMAAVpBM.jpg" data-search="GUc35AMWMAAVpBM jpg image picture banner large"><span class="file-ext img">jpg</span><span class="file-name">GUc35AMWMAAVpBM.jpg</span></a>
+                            <a class="file-item" href="/html-folder/beatles.jpg" data-search="beatles jpg image picture music band"><span class="file-ext img">jpg</span><span class="file-name">beatles.jpg</span></a>
+                            <a class="file-item" href="/html-folder/8001252-015-nordic_apparel-boxer_samlet_web_1.png" data-search="nordic apparel boxer samlet web png image picture clothing brand"><span class="file-ext img">png</span><span class="file-name">nordic_apparel-boxer.png</span></a>
                         </div>
                     </div>
 
-                    <!-- Subfolder: Data Files -->
-                    <div class="subfolder" data-name="data json config settings nve">
+                    <div class="subfolder" data-subfolder="media-datafiles">
                         <div class="subfolder-header">
                             <span class="subfolder-icon">📋</span>
                             <span class="subfolder-name">Data Files</span>
-                            <span class="subfolder-file-count">3 files</span>
+                            <span class="subfolder-file-count">3</span>
                         </div>
                         <div class="file-list">
-                            <a class="file-item" href="/SCRIPTS/NVE_Magasinstatistikk.json" data-search="nve magasinstatistikk json data reservoir statistics norwegian water">
-                                <span class="file-ext json">json</span>
-                                <span class="file-name">NVE_Magasinstatistikk.json</span>
-                            </a>
-                            <a class="file-item" href="/SCRIPTS/NVE_Magasinstatistikk_restructured.json" data-search="nve magasinstatistikk restructured json data reservoir statistics reformatted">
-                                <span class="file-ext json">json</span>
-                                <span class="file-name">NVE_Magasinstatistikk_restructured.json</span>
-                            </a>
-                            <a class="file-item" href="/SCRIPTS/gh.json" data-search="gh json config data settings github">
-                                <span class="file-ext json">json</span>
-                                <span class="file-name">gh.json</span>
-                            </a>
+                            <a class="file-item" href="/SCRIPTS/NVE_Magasinstatistikk.json" data-search="nve magasinstatistikk json data reservoir statistics norwegian water"><span class="file-ext json">json</span><span class="file-name">NVE_Magasinstatistikk.json</span></a>
+                            <a class="file-item" href="/SCRIPTS/NVE_Magasinstatistikk_restructured.json" data-search="nve magasinstatistikk restructured json data reservoir statistics reformatted"><span class="file-ext json">json</span><span class="file-name">NVE_Magasinstatistikk_restructured.json</span></a>
+                            <a class="file-item" href="/SCRIPTS/gh.json" data-search="gh json config data settings github"><span class="file-ext json">json</span><span class="file-name">gh.json</span></a>
                         </div>
                     </div>
 
-                    <!-- Subfolder: Stylesheets -->
-                    <div class="subfolder" data-name="stylesheets css style design">
+                    <div class="subfolder" data-subfolder="media-stylesheets">
                         <div class="subfolder-header">
                             <span class="subfolder-icon">🎨</span>
                             <span class="subfolder-name">Stylesheets</span>
-                            <span class="subfolder-file-count">6 files</span>
+                            <span class="subfolder-file-count">6</span>
                         </div>
                         <div class="file-list">
-                            <a class="file-item" href="/SCRIPTS/calc.css" data-search="calc css stylesheet calculator style design">
-                                <span class="file-ext css">css</span>
-                                <span class="file-name">calc.css</span>
-                            </a>
-                            <a class="file-item" href="/SCRIPTS/conve.css" data-search="conve css stylesheet converter style design">
-                                <span class="file-ext css">css</span>
-                                <span class="file-name">conve.css</span>
-                            </a>
-                            <a class="file-item" href="/SCRIPTS/klaku.css" data-search="klaku css stylesheet calculator style design">
-                                <span class="file-ext css">css</span>
-                                <span class="file-name">klaku.css</span>
-                            </a>
-                            <a class="file-item" href="/SCRIPTS/spill.css" data-search="spill css stylesheet game style design">
-                                <span class="file-ext css">css</span>
-                                <span class="file-name">spill.css</span>
-                            </a>
-                            <a class="file-item" href="/SCRIPTS/myspill.css" data-search="myspill css stylesheet game personal style design">
-                                <span class="file-ext css">css</span>
-                                <span class="file-name">myspill.css</span>
-                            </a>
-                            <a class="file-item" href="/SCRIPTS/worriars.css" data-search="worriars css stylesheet warriors style design">
-                                <span class="file-ext css">css</span>
-                                <span class="file-name">worriars.css</span>
-                            </a>
+                            <a class="file-item" href="/SCRIPTS/calc.css" data-search="calc css stylesheet calculator style design"><span class="file-ext css">css</span><span class="file-name">calc.css</span></a>
+                            <a class="file-item" href="/SCRIPTS/conve.css" data-search="conve css stylesheet converter style design"><span class="file-ext css">css</span><span class="file-name">conve.css</span></a>
+                            <a class="file-item" href="/SCRIPTS/klaku.css" data-search="klaku css stylesheet calculator style design"><span class="file-ext css">css</span><span class="file-name">klaku.css</span></a>
+                            <a class="file-item" href="/SCRIPTS/spill.css" data-search="spill css stylesheet game style design"><span class="file-ext css">css</span><span class="file-name">spill.css</span></a>
+                            <a class="file-item" href="/SCRIPTS/myspill.css" data-search="myspill css stylesheet game personal style design"><span class="file-ext css">css</span><span class="file-name">myspill.css</span></a>
+                            <a class="file-item" href="/SCRIPTS/worriars.css" data-search="worriars css stylesheet warriors style design"><span class="file-ext css">css</span><span class="file-name">worriars.css</span></a>
                         </div>
                     </div>
 
                 </div>
             </div>
 
-        </div><!-- /sectionsContainer -->
+        </div>
 
         <div class="no-results hidden" id="noResults">
             <div class="no-results-icon">🔍</div>
@@ -744,35 +854,284 @@
     </div>
 
     <script>
-        const input = document.getElementById('searchInput');
-        const clearBtn = document.getElementById('searchClear');
-        const meta = document.getElementById('resultsMeta');
+        // ==================== SETTINGS PANEL ====================
+        const settingsBtn = document.getElementById('settingsBtn');
+        const settingsPanel = document.getElementById('settingsPanel');
+        const settingsOverlay = document.getElementById('settingsOverlay');
+        const settingsClose = document.getElementById('settingsClose');
+        const togglesContainer = document.getElementById('togglesContainer');
+        const btnShowAll = document.getElementById('btnShowAll');
+        const btnHideAll = document.getElementById('btnHideAll');
+        const btnExport = document.getElementById('btnExport');
+        const toast = document.getElementById('toast');
+
+        // Section + subfolder definitions
+        const sectionDefs = [
+            {
+                id: 'pages', icon: '📄', title: 'Pages',
+                subfolders: [
+                    { id: 'pages-root', name: 'Root', count: 3 },
+                    { id: 'pages-dashboard', name: 'Dashboard', count: 2 },
+                    { id: 'pages-tools', name: 'Tools', count: 4 },
+                    { id: 'pages-general', name: 'General', count: 4 },
+                ]
+            },
+            {
+                id: 'htmls', icon: '🌐', title: 'HTMLS',
+                subfolders: [
+                    { id: 'htmls-main', name: 'Main', count: 3 },
+                    { id: 'htmls-design', name: 'Graving & Design', count: 3 },
+                    { id: 'htmls-scripts', name: 'Scripts & Code', count: 4 },
+                    { id: 'htmls-animation', name: 'Animation', count: 4 },
+                ]
+            },
+            {
+                id: 'projects', icon: '🚀', title: 'Projects',
+                subfolders: [
+                    { id: 'projects-games', name: 'Games', count: 5 },
+                    { id: 'projects-crypto', name: 'Crypto & Auth', count: 3 },
+                    { id: 'projects-testing', name: 'Testing', count: 4 },
+                    { id: 'projects-data', name: 'Data & Logic', count: 5 },
+                ]
+            },
+            {
+                id: 'media', icon: '🖼️', title: 'Media & Data',
+                subfolders: [
+                    { id: 'media-images', name: 'Images', count: 5 },
+                    { id: 'media-banners', name: 'GIFs & Banners', count: 3 },
+                    { id: 'media-datafiles', name: 'Data Files', count: 3 },
+                    { id: 'media-stylesheets', name: 'Stylesheets', count: 6 },
+                ]
+            },
+        ];
+
+        // Load saved visibility state
+        function loadState() {
+            try {
+                const saved = localStorage.getItem('mtweb-visibility');
+                if (saved) return JSON.parse(saved);
+            } catch(e) {}
+            // Default: all visible
+            const state = {};
+            sectionDefs.forEach(s => {
+                state[s.id] = true;
+                s.subfolders.forEach(sf => { state[sf.id] = true; });
+            });
+            return state;
+        }
+
+        function saveState(state) {
+            localStorage.setItem('mtweb-visibility', JSON.stringify(state));
+        }
+
+        let visibilityState = loadState();
+
+        // Build toggle UI
+        function buildToggles() {
+            togglesContainer.innerHTML = '';
+            sectionDefs.forEach(section => {
+                const secDiv = document.createElement('div');
+                secDiv.className = 'toggle-section';
+
+                const header = document.createElement('div');
+                header.className = 'toggle-section-header';
+                header.innerHTML = `
+                    <span style="font-size:0.9rem">${section.icon}</span>
+                    <span class="toggle-section-title">${section.title}</span>
+                    <button class="toggle-section-all" data-section="${section.id}">Toggle all</button>
+                `;
+                secDiv.appendChild(header);
+
+                // Section master toggle
+                const secToggle = document.createElement('div');
+                secToggle.className = 'toggle-item';
+                secToggle.innerHTML = `
+                    <span class="toggle-label" style="font-weight:600;color:#e6edf3">
+                        ${section.title} (all)
+                    </span>
+                    <label class="switch">
+                        <input type="checkbox" data-toggle="section" data-id="${section.id}" ${visibilityState[section.id] !== false ? 'checked' : ''}>
+                        <span class="slider"></span>
+                    </label>
+                `;
+                secDiv.appendChild(secToggle);
+
+                // Subfolder toggles
+                section.subfolders.forEach(sf => {
+                    const sfDiv = document.createElement('div');
+                    sfDiv.className = 'toggle-item';
+                    sfDiv.style.paddingLeft = '20px';
+                    sfDiv.innerHTML = `
+                        <span class="toggle-label">
+                            ${sf.name}
+                            <span class="toggle-count">${sf.count}</span>
+                        </span>
+                        <label class="switch">
+                            <input type="checkbox" data-toggle="subfolder" data-id="${sf.id}" data-section="${section.id}" ${visibilityState[sf.id] !== false ? 'checked' : ''}>
+                            <span class="slider"></span>
+                        </label>
+                    `;
+                    secDiv.appendChild(sfDiv);
+                });
+
+                togglesContainer.appendChild(secDiv);
+            });
+
+            // Bind toggle events
+            togglesContainer.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                cb.addEventListener('change', function() {
+                    const type = this.dataset.toggle;
+                    const id = this.dataset.id;
+                    visibilityState[id] = this.checked;
+                    saveState(visibilityState);
+                    applyVisibility();
+
+                    // If toggling a section, update all its subfolder checkboxes
+                    if (type === 'section') {
+                        const subCbs = togglesContainer.querySelectorAll(`input[data-section="${id}"]:not([data-id="${id}"])`);
+                        subCbs.forEach(sc => {
+                            sc.checked = this.checked;
+                            visibilityState[sc.dataset.id] = this.checked;
+                        });
+                        saveState(visibilityState);
+                    }
+                });
+            });
+
+            // Bind "Toggle all" per section
+            togglesContainer.querySelectorAll('.toggle-section-all').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const secId = this.dataset.section;
+                    const section = sectionDefs.find(s => s.id === secId);
+                    const allOn = section.subfolders.every(sf => visibilityState[sf.id] !== false);
+                    const newState = !allOn;
+
+                    section.subfolders.forEach(sf => {
+                        visibilityState[sf.id] = newState;
+                        const cb = togglesContainer.querySelector(`input[data-id="${sf.id}"]`);
+                        if (cb) cb.checked = newState;
+                    });
+                    visibilityState[secId] = newState;
+                    const secCb = togglesContainer.querySelector(`input[data-id="${secId}"]`);
+                    if (secCb) secCb.checked = newState;
+
+                    saveState(visibilityState);
+                    applyVisibility();
+                });
+            });
+        }
+
+        // Apply visibility to DOM
+        function applyVisibility() {
+            sectionDefs.forEach(section => {
+                const secEl = document.querySelector(`.section[data-section="${section.id}"]`);
+                if (!secEl) return;
+
+                // Check if any subfolders are visible
+                const anySubVisible = section.subfolders.some(sf => visibilityState[sf.id] !== false);
+
+                if (visibilityState[section.id] !== false && anySubVisible) {
+                    secEl.classList.remove('hidden-section');
+                } else {
+                    secEl.classList.add('hidden-section');
+                }
+
+                // Toggle subfolders
+                section.subfolders.forEach(sf => {
+                    const sfEl = document.querySelector(`.subfolder[data-subfolder="${sf.id}"]`);
+                    if (sfEl) {
+                        if (visibilityState[sf.id] !== false) {
+                            sfEl.classList.remove('hidden-subfolder');
+                        } else {
+                            sfEl.classList.add('hidden-subfolder');
+                        }
+                    }
+                });
+            });
+        }
+
+        // Panel open/close
+        function openPanel() {
+            settingsPanel.classList.add('open');
+            settingsOverlay.classList.add('open');
+        }
+        function closePanel() {
+            settingsPanel.classList.remove('open');
+            settingsOverlay.classList.remove('open');
+        }
+
+        settingsBtn.addEventListener('click', openPanel);
+        settingsClose.addEventListener('click', closePanel);
+        settingsOverlay.addEventListener('click', closePanel);
+
+        // Show All / Hide All
+        btnShowAll.addEventListener('click', () => {
+            sectionDefs.forEach(s => {
+                visibilityState[s.id] = true;
+                s.subfolders.forEach(sf => { visibilityState[sf.id] = true; });
+            });
+            saveState(visibilityState);
+            buildToggles();
+            applyVisibility();
+            showToast('All sections visible');
+        });
+
+        btnHideAll.addEventListener('click', () => {
+            sectionDefs.forEach(s => {
+                visibilityState[s.id] = false;
+                s.subfolders.forEach(sf => { visibilityState[sf.id] = false; });
+            });
+            saveState(visibilityState);
+            buildToggles();
+            applyVisibility();
+            showToast('All sections hidden');
+        });
+
+        // Export config
+        btnExport.addEventListener('click', () => {
+            const config = JSON.stringify(visibilityState, null, 2);
+            navigator.clipboard.writeText(config).then(() => {
+                showToast('Config copied to clipboard!');
+            }).catch(() => {
+                showToast('Failed to copy');
+            });
+        });
+
+        // Toast
+        function showToast(msg) {
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
+        // ==================== SEARCH ====================
+        const searchInput = document.getElementById('searchInput');
+        const searchClear = document.getElementById('searchClear');
+        const resultsMeta = document.getElementById('resultsMeta');
         const noResults = document.getElementById('noResults');
-        const container = document.getElementById('sectionsContainer');
+        const sectionsContainer = document.getElementById('sectionsContainer');
 
-        const sections = document.querySelectorAll('.section');
-        const subfolders = document.querySelectorAll('.subfolder');
-        const fileItems = document.querySelectorAll('.file-item');
+        const allSubfolders = document.querySelectorAll('.subfolder');
+        const allFileItems = document.querySelectorAll('.file-item');
+        const allSections = document.querySelectorAll('.section');
 
-        function search(query) {
+        function doSearch(query) {
             const q = query.toLowerCase().trim();
             let totalVisible = 0;
-            let totalFiles = fileItems.length;
 
             if (!q) {
-                // Show everything
-                subfolders.forEach(sf => sf.classList.remove('hidden'));
-                fileItems.forEach(fi => fi.classList.remove('hidden'));
-                sections.forEach(s => s.classList.remove('hidden'));
-                meta.textContent = '';
+                allSubfolders.forEach(sf => sf.classList.remove('hidden'));
+                allFileItems.forEach(fi => fi.classList.remove('hidden'));
+                allSections.forEach(s => s.classList.remove('hidden'));
+                resultsMeta.textContent = '';
                 noResults.classList.add('hidden');
-                container.classList.remove('hidden');
+                sectionsContainer.classList.remove('hidden');
+                applyVisibility(); // re-apply toggle state
                 return;
             }
 
-            // Filter file items
-            fileItems.forEach(fi => {
-                const text = fi.dataset.search.toLowerCase() + ' ' + fi.querySelector('.file-name').textContent.toLowerCase();
+            allFileItems.forEach(fi => {
+                const text = (fi.dataset.search + ' ' + fi.querySelector('.file-name').textContent).toLowerCase();
                 if (text.includes(q)) {
                     fi.classList.remove('hidden');
                     totalVisible++;
@@ -781,49 +1140,42 @@
                 }
             });
 
-            // Hide/show subfolders based on visible children
-            subfolders.forEach(sf => {
+            allSubfolders.forEach(sf => {
                 const visibleFiles = sf.querySelectorAll('.file-item:not(.hidden)');
-                if (visibleFiles.length === 0) {
-                    sf.classList.add('hidden');
-                } else {
-                    sf.classList.remove('hidden');
-                }
+                sf.classList.toggle('hidden', visibleFiles.length === 0);
             });
 
-            // Hide/show sections based on visible subfolders
-            sections.forEach(s => {
+            allSections.forEach(s => {
                 const visibleSubfolders = s.querySelectorAll('.subfolder:not(.hidden)');
-                if (visibleSubfolders.length === 0) {
-                    s.classList.add('hidden');
-                } else {
-                    s.classList.remove('hidden');
-                }
+                s.classList.toggle('hidden', visibleSubfolders.length === 0);
             });
 
-            // Results meta
             if (totalVisible === 0) {
-                meta.textContent = '';
-                container.classList.add('hidden');
+                resultsMeta.textContent = '';
+                sectionsContainer.classList.add('hidden');
                 noResults.classList.remove('hidden');
             } else {
                 noResults.classList.add('hidden');
-                container.classList.remove('hidden');
-                meta.textContent = totalVisible + ' result' + (totalVisible !== 1 ? 's' : '') + ' found';
+                sectionsContainer.classList.remove('hidden');
+                resultsMeta.textContent = totalVisible + ' result' + (totalVisible !== 1 ? 's' : '') + ' found';
             }
         }
 
-        input.addEventListener('input', function() {
-            clearBtn.classList.toggle('show', this.value.length > 0);
-            search(this.value);
+        searchInput.addEventListener('input', function() {
+            searchClear.classList.toggle('show', this.value.length > 0);
+            doSearch(this.value);
         });
 
-        clearBtn.addEventListener('click', function() {
-            input.value = '';
-            clearBtn.classList.remove('show');
-            search('');
-            input.focus();
+        searchClear.addEventListener('click', function() {
+            searchInput.value = '';
+            searchClear.classList.remove('show');
+            doSearch('');
+            searchInput.focus();
         });
+
+        // ==================== INIT ====================
+        buildToggles();
+        applyVisibility();
     </script>
 </body>
 </html>
