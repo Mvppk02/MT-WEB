@@ -1,0 +1,35 @@
+#main-div
+{
+  height: 400px;
+  width: 250px;
+  border: double,black;
+  justify-self: center;
+  justify-items: center;
+  background-image: linear-gradient(red,blue);
+  border-radius: 10px;
+}
+#input
+{
+  margin-top: 7px;
+  margin-left: 35px;
+}
+.main-bt
+{
+  margin-top: 15px;
+}
+button
+{
+  border: double;
+}
+img
+{
+  margin-left: 95px;
+  height: 75px;
+  border-radius: 15px;
+  border: solid black;
+  margin-top: 5px;
+}
+body
+{
+  background-color: black;
+}

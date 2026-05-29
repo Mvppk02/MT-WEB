@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script>
+
+        function inisialisering() 
+        {
+          let tall1 = Number(document.getElementById("txt1").value);
+          let tall2 = Number(document.getElementById("txt2").value);
+          let output = document.getElementById("output");
+
+          if (Number.isNaN(tall1) || Number.isNaN(tall2))
+          {
+            output.textContent = "Skriv inn to gyldige tall.";
+            return;
+          }
+
+          let sum = adder(tall1, tall2);
+          output.textContent = sum;
+        }
+
+        function adder(t1,t2)
+        {
+           return t1+t2;
+        }
+    </script>
+</head>
+<body>
+    <div>
+        <label for="txt1">tall 1</label>
+        <input type="text" id="txt1">
+        <label for="txt2">tall 2</label>
+        <input type="text" id="txt2">
+        <button id="btnsum" onclick="inisialisering()">sum</button>
+    </div>
+    <label for="output">sum er:</label>
+    <output id="output"></output>
+</body>
+</html>
