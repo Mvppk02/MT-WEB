@@ -1,0 +1,42 @@
+{
+  "_comment": "MT-WEB visibility config. true = visible, false = hidden. This file controls what visitors see by default.",
+  "version": 1,
+  "sections": {
+    "pages": {
+      "visible": true,
+      "subfolders": {
+        "pages-root": true,
+        "pages-dashboard": true,
+        "pages-tools": true,
+        "pages-general": true
+      }
+    },
+    "htmls": {
+      "visible": true,
+      "subfolders": {
+        "htmls-main": true,
+        "htmls-design": true,
+        "htmls-scripts": true,
+        "htmls-animation": true
+      }
+    },
+    "projects": {
+      "visible": true,
+      "subfolders": {
+        "projects-games": true,
+        "projects-crypto": true,
+        "projects-testing": true,
+        "projects-data": true
+      }
+    },
+    "media": {
+      "visible": true,
+      "subfolders": {
+        "media-images": true,
+        "media-banners": true,
+        "media-datafiles": true,
+        "media-stylesheets": true
+      }
+    }
+  }
+}
