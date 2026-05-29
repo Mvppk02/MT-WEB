@@ -5,7 +5,7 @@
     "pages": {
       "visible": true,
       "subfolders": {
-        "pages-root": false,
+        "pages-root": true,
         "pages-dashboard": true,
         "pages-tools": true,
         "pages-general": true
