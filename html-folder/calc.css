@@ -1,0 +1,33 @@
+.button-sp button {
+  width: 50px;
+  height: 50px;
+  margin: 5px;
+  font-size: 18px;
+  background-color: lightcyan;
+}
+#alike{
+  background-color: orange;
+}
+#slette{
+  background-color: orange;
+  width: fit-content;
+}
+#plus{
+  background-color: orange;
+}
+#minus{
+  background-color: orange;
+}
+#gange{
+  background-color: orange;
+}
+#dele{
+  background-color: orange;
+}
+
+#display {
+  width: 200px;
+  font-size: 24px;
+  text-align: right;
+  margin-top: 10px;
+}
