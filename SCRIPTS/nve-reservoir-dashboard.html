@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NVE Reservoir Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: 'Inter', sans-serif;
+      background: #0b1120;
+      color: #f5f7ff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 24px;
+      background: linear-gradient(180deg, #111827 0%, #1f2937 100%);
+    }
+
+    .page {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: clamp(2rem, 3vw, 3rem);
+      letter-spacing: -0.04em;
+    }
+
+    header p {
+      margin: 12px auto 0;
+      max-width: 720px;
+      color: #cbd5e1;
+      line-height: 1.75;
+    }
+
+    .panel {
+      display: grid;
+      gap: 20px;
+      grid-template-columns: 1fr;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding: 20px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 18px;
+      backdrop-filter: blur(10px);
+    }
+
+    .controls label {
+      font-weight: 600;
+      color: #e2e8f0;
+    }
+
+    .controls select {
+      min-width: 220px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(15,23,42,0.95);
+      color: #f8fafc;
+      padding: 12px 14px;
+      font-size: 1rem;
+    }
+
+    .stats {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    .card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.25);
+    }
+
+    .card h2 {
+      margin: 0 0 12px;
+      font-size: 1rem;
+      letter-spacing: 0.02em;
+      color: #94a3b8;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .card .value {
+      margin: 0;
+      font-size: clamp(1.75rem, 2.5vw, 2.75rem);
+      font-weight: 700;
+      color: #f8fafc;
+    }
+
+    .chart-panel {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.2);
+    }
+
+    .chart-panel h2 {
+      margin-top: 0;
+      font-size: 1.1rem;
+      color: #e2e8f0;
+    }
+
+    canvas {
+      width: 100% !important;
+      height: auto !important;
+      max-height: 520px;
+    }
+
+    .footer {
+      margin-top: 24px;
+      text-align: center;
+      color: #94a3b8;
+      font-size: 0.95rem;
+    }
+
+    .message {
+      padding: 18px 20px;
+      background: rgba(248, 113, 113, 0.15);
+      color: #fee2e2;
+      border: 1px solid rgba(248, 113, 113, 0.25);
+      border-radius: 16px;
+      margin-top: 16px;
+    }
+
+    @media (max-width: 760px) {
+      .controls {
+        flex-direction: column;
+        align-items: stretch;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <h1>NVE reservoar-dashboard</h1>
+      <p>Velg region for å vise siste fyllingsgraddata fra NVE. Grafen viser siste 52 ukers fyllingsgrad i prosent.</p>
+    </header>
+
+    <div class="panel">
+      <div class="controls">
+        <div>
+          <label for="regionSelect">Velg region</label>
+          <select id="regionSelect" aria-label="Velg region"></select>
+        </div>
+        <div>
+          <label for="recordCountSelect">Vis poster</label>
+          <select id="recordCountSelect" aria-label="Velg antall poster"></select>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="card">
+          <h2>Nåværende fyllingsgrad</h2>
+          <p class="value" id="currentFill">–</p>
+        </div>
+        <div class="card">
+          <h2>Siste oppdatering</h2>
+          <p class="value" id="latestDate">–</p>
+        </div>
+        <div class="card">
+          <h2>Antall poster</h2>
+          <p class="value" id="recordCount">–</p>
+        </div>
+      </div>
+
+      <section class="chart-panel">
+        <h2>Siste 52 uker: fyllingsgrad</h2>
+        <canvas id="fillChart" aria-label="Fyllingsgrad graf" role="img"></canvas>
+        <div class="message" id="loadingMessage">Laster data...</div>
+      </section>
+    </div>
+
+    <p class="footer">Data hentet fra <strong>NVE Magasinstatistikk</strong>. Fil: <code>NVE_Magasinstatistikk_restructured.json</code>.</p>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    const regionNames = {
+      '0': 'Totalt (NO)',
+      '1': 'Østlandet',
+      '2': 'Sørlandet',
+      '3': 'Vestlandet',
+      '4': 'Trøndelag',
+      '5': 'Nord-Norge'
+    };
+
+    const select = document.getElementById('regionSelect');
+    const recordCountSelect = document.getElementById('recordCountSelect');
+    const currentFillEl = document.getElementById('currentFill');
+    const latestDateEl = document.getElementById('latestDate');
+    const recordCountEl = document.getElementById('recordCount');
+    const loadingMessage = document.getElementById('loadingMessage');
+    const ctx = document.getElementById('fillChart').getContext('2d');
+    let chart = null;
+    let regions = {};
+
+    async function loadData() {
+      try {
+        const response = await fetch('NVE_Magasinstatistikk_restructured.json');
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        const json = await response.json();
+        regions = json.regions || {};
+        populateRegions();
+        const firstRegion = Object.keys(regions)[0] || '0';
+        select.value = firstRegion;
+        updateRegion(firstRegion);
+      } catch (error) {
+        loadingMessage.textContent = `Feil ved lasting av data: ${error.message}`;
+        loadingMessage.style.background = 'rgba(248, 113, 113, 0.18)';
+      }
+    }
+
+    function populateRegions() {
+      const keys = Object.keys(regions).sort((a, b) => Number(a) - Number(b));
+      select.innerHTML = keys.map(key => `<option value="${key}">${regionNames[key] || `Region ${key}`}</option>`).join('');
+
+      recordCountSelect.innerHTML = [
+        { value: '52', label: 'Siste 52' },
+        { value: '104', label: 'Siste 104' },
+        { value: '260', label: 'Siste 260' },
+        { value: 'all', label: 'Alle poster' }
+      ].map(option => `<option value="${option.value}">${option.label}</option>`).join('');
+    }
+
+    function getSelectedRecordLimit(total) {
+      const selection = recordCountSelect.value;
+      if (selection === 'all') {
+        return total;
+      }
+      return Math.min(total, Number(selection));
+    }
+
+    function updateRegion(regionId) {
+      const region = regions[regionId];
+      if (!region || !region.records || region.records.length === 0) {
+        loadingMessage.textContent = 'Ingen data tilgjengelig for valgt region.';
+        return;
+      }
+
+      const limit = getSelectedRecordLimit(region.records.length);
+      const records = region.records.slice(0, limit);
+      const labels = records.map(item => new Date(item.dato_Id).toLocaleDateString('nb-NO', { day: '2-digit', month: '2-digit', year: '2-digit' })).reverse();
+      const dataPoints = records.map(item => Number((item.fyllingsgrad * 100).toFixed(2))).reverse();
+
+      currentFillEl.textContent = `${dataPoints[dataPoints.length - 1].toFixed(2)} %`;
+      latestDateEl.textContent = new Date(records[0].dato_Id).toLocaleDateString('nb-NO');
+      recordCountEl.textContent = `${records.length} / ${region.records.length}`;
+      loadingMessage.style.display = 'none';
+
+      const chartData = {
+        labels,
+        datasets: [{
+          label: 'Fyllingsgrad (%)',
+          data: dataPoints,
+          borderColor: '#60a5fa',
+          backgroundColor: 'rgba(96, 165, 250, 0.22)',
+          pointRadius: 3,
+          pointHoverRadius: 6,
+          fill: true,
+          tension: 0.25,
+          borderWidth: 3
+        }]
+      };
+
+      const chartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: {
+            display: true,
+            ticks: { color: '#cbd5e1' },
+            grid: { color: 'rgba(148, 163, 184, 0.16)' }
+          },
+          y: {
+            beginAtZero: true,
+            max: 100,
+            ticks: { color: '#cbd5e1' },
+            grid: { color: 'rgba(148, 163, 184, 0.16)' }
+          }
+        },
+        plugins: {
+          legend: {
+            labels: { color: '#e2e8f0' }
+          },
+          tooltip: {
+            callbacks: {
+              label: context => `${context.parsed.y.toFixed(2)} %`
+            }
+          }
+        }
+      };
+
+      if (chart) {
+        chart.data = chartData;
+        chart.options = chartOptions;
+        chart.update();
+      } else {
+        chart = new Chart(ctx, {
+          type: 'line',
+          data: chartData,
+          options: chartOptions
+        });
+      }
+    }
+
+    select.addEventListener('change', event => {
+      updateRegion(event.target.value);
+    });
+
+    recordCountSelect.addEventListener('change', () => {
+      updateRegion(select.value);
+    });
+
+    window.addEventListener('load', loadData);
+  </script>
+</body>
+</html>
