@@ -1,0 +1,35 @@
+.bt
+{
+ color: red; 
+ border-radius: 35px;
+}
+.bt:hover
+{
+  cursor: pointer;
+}
+.bt:active
+{
+  color: green;
+  opacity: 0.7;
+}
+
+
+#input1
+{
+  margin-top: 15px;
+}
+
+
+/*backgrounds*/
+#b1
+{
+  background-color: bisque;
+}
+#divc
+{
+  background-color: lightblue;
+}
+.skriveut
+{
+  background-color: lightcoral;
+}

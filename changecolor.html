@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+     
+    <script>
+        window.onload = starter
+        function starter()
+        {
+            let red = document.getElementById("rd").value;
+            let green = document.getElementById("gn").value;
+            let blue = document.getElementById("be").value;
+            let opacity = document.getElementById("opa").value;
+            document.body.style.backgroundColor = "rgb(" + red + ", " + green + ", " + blue + ","+opacity+")";
+        }
+    </script>
+</head>
+<body>
+    <div>
+        <label for="r">R</label>
+        <input id="rd"><br>
+        
+        <label for="g">G</label>
+        <input id="gn"><br>
+        
+        <label for="b">B</label>
+        <input id="be">
+        
+        <label for="opa">Opacity</label>
+        <input id="opa">
+        
+        <button onclick="starter()">start</button>
+    </div>
+</body>
+</html>

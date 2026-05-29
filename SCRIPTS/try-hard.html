@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <link rel="stylesheet" href="tryhard.css">
+
+  <script>
+    
+      let handellist =[];
+      const KEY = "LAGRING";
+    function oppstart()
+    {
+      let vare = document.getElementById("input").value;
+      handellist.push(vare);
+      oppdaterliste();
+    }
+
+    function slett()
+    {
+      let vareNummer = document.getElementById("input").value;
+      handellist.splice(vareNummer-1,1);
+      oppdaterliste();
+
+      console.log("slett-testing");
+    }
+
+    
+    function oppdaterliste()
+    {
+      for (let i=0;i<handellist.length;i++)
+      {
+        let li = document.createElement("li");
+        li.textContent = handellist[i];
+        liste.appendChild(li);
+        console.log("ol"+li.textContent);
+        lagre();
+        
+      }
+    }
+
+    function lagre()
+    {
+      localStorage.setItem(KEY, JSON.stringify(handellist));
+
+    }
+
+    function hente()
+    {
+      let data = localStorage.getItem(KEY,handellist);
+      JSON.parse(handellist);
+    }
+ 
+
+  </script>
+
+</head>
+<body id="ck">
+    <div id="main-div">
+      <img src="joker.png" alt="">
+      <input type="text"id="input" placeholder="skrive inn vare">
+      
+      <div class="main-bt">
+        <button onclick="oppstart()">legg til</button>
+        <button onclick="slett()">slette</button>
+        <button onclick="hente()">hente data</button>
+      </div>
+    </div>
+  <ol id="liste"></ol>
+</body>
+</html>

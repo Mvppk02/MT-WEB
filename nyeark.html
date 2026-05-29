@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <script>
+         
+         let dyrer = ["grevling", "gris", "hest", "ku", "hund", "katt", "love"];
+        function randomtall()
+        {
+            
+            let tall = Math.floor(Math.random() *7);
+            let valgtdyr = velgdyr(tall);
+            console.log(valgtdyr)
+            document.getElementById("innskrive").innerHTML = valgtdyr;
+        }
+
+        function velgdyr(tall)
+        {
+            return dyrer[tall];
+        }
+    </script>
+</head>
+<body>
+    <button id="starte" onclick="randomtall()">start</button>
+    <output id="innskrive">dyr er:</output>
+    <style>
+        body
+        {
+            background-image: linear-gradient(red,blue);
+        }
+    </style>
+</body>
+</html>

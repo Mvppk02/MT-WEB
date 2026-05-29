@@ -1,0 +1,80 @@
+
+
+<!DOCTYPE html>
+<html lang="no">
+
+<head>
+    <meta charset="UTF-8">
+    <title>melding</title>
+
+    <script>
+        <? php
+// Database-tilkobling
+$servername = "localhost";
+            $username = "root";
+            $password = "";
+            $dbname = "hilsen";
+
+            $conn = new mysqli($servername, $username, $password, $dbname);
+            $conn -> set_charset("utf8mb4");
+
+            if ($conn -> connect_error) {
+                die("Tilkobling feilet: ".$conn -> connect_error);
+            }
+
+            // Hvis skjemaet er sendt
+            if (isset($_POST['navn']) && isset($_POST['tekst'])) {
+                $navn = $_POST['navn'];
+                $tekst = $_POST['tekst'];
+
+                // Prepared statement (trygg løsning)
+                $stmt = $conn -> prepare(
+                    "INSERT INTO melding (navn, tekst) VALUES (?, ?)"
+                );
+                $stmt -> bind_param("ss", $navn, $tekst);
+                $stmt -> execute();
+                $stmt -> close();
+                // Hent alle melding
+                $result = $conn -> query("SELECT navn, tekst FROM melding")
+                
+
+                    ?
+            }>
+    </script>
+</head>
+
+<body>
+
+    <h1>Skriv en hilsen</h1>
+
+    <form method="post">
+        <label for="navn">Navn:</label><br>
+        <input type="text" id="navn" name="navn" required><br><br>
+
+        <label for="tekst">Hilsen:</label><br>
+        <textarea id="tekst" name="tekst" rows="4" cols="40" required></textarea><br><br>
+
+        <button type="submit">Send</button>
+    </form>
+
+    <hr>
+
+    <h2>Alle melding</h2>
+
+    <?php
+if ($result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        echo "<p><strong>" . htmlspecialchars($row['navn']) . ":</strong><br>";
+        echo htmlspecialchars($row['tekst']) . "</p><hr>";
+    }
+} else {
+    echo "Ingen melding ennå.";
+}
+
+$conn->close();
+?>
+
+</body>
+
+</html>
+``

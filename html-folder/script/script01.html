@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="script01.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script>
+        window.onload = security
+        function security(){
+              let text;
+            let person = prompt("Enter your name:", "");
+           if (person ===mvppk02 || person == "") {
+            text = "No input was Entered.";
+           }
+           else{
+            //do not show the page if not entered correct or loop
+            
+           }
+           
+        }
+        window = oppstart
+           function oppstart(){
+            let tid = new Date();
+            document.getElementById("day").innerHTML = tid.getDate() + ":";
+            document.getElementById("hour").innerHTML = tid.getHours() + ":";
+            document.getElementById("minut").innerHTML = tid.getMinutes() + ":";
+            document.getElementById("sec").innerHTML = tid.getSeconds();
+            setTimeout(oppstart, 1000);
+        }
+    </script>
+    <script>
+        window = oppstart1;
+        function oppstart1 (){
+            let text;
+           let person = prompt("Enter your name:", "");
+           if (person == null || person == "") {
+            text = "No input was Entered.";
+           }
+           /*if (person == oskar){
+            text = "tru again.";
+           }
+           document.getElementById("sk").innerHTML = text;*/
+           else {
+            text =  "hello"  +  person + " how are you?";
+           }
+           document.getElementById("mdk").innerHTML = text;
+        }
+    </script>
+    <script>
+       /* window.onload = oppstart;
+        function oppstart(){
+            let tid = new Date();
+            document.getElementById("day").innerHTML = tid.getDate() + ":";
+            document.getElementById("hour").innerHTML = tid.getHours() + ":";
+            document.getElementById("minut").innerHTML = tid.getMinutes() + ":";
+            document.getElementById("sec").innerHTML = tid.getSeconds();
+            setTimeout(oppstart, 1000);
+        }
+    </script>
+</head>
+
+
+<body>
+      
+        <div class="first">
+            <button onclick="oppstart()">Click</button>
+            <button onclick="window.print()">print this page</button><br>
+            <p id="mdk"></p>
+            <p id="sk"></p>
+        </div>
+      
+   <div class="time">
+      <div><h1 id="day"></h1></div>
+      <div id="bl"></h1><H1 id="hour"></H1></div>
+      <div></H1><H1 id="minut"></H1></div>
+      <div id="bl"></H1><H1 id="sec"></H1></div>
+   </div>
+</body>
+</html>

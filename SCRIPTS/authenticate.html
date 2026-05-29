@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script>
+      function oppstart()
+      {
+       let userName = document.getElementById("user").value;
+       let pass = document.getElementById("pwd").value;
+       if(userName == "user" && pass == "pwd")
+       {
+        document.getElementById("output").innerHTML = "congrats";
+        console.log(user);
+       } else
+       {
+         document.getElementById("output").innerHTML = "try again";
+         console.log(pwd);
+       }
+      }
+    </script>
+  </head>
+  <body>
+    <div style="display: inline-block;">
+    <label for="user">User</label>
+    <input type="text" name="" id="user">
+    </div>
+    <div style="margin-top: 15px;">
+    <label for="pwd">Pwd</label>
+    <input type="text" name="" id="pwd">
+    </div>
+    <button style="margin-top: 15px;" onclick="oppstart()">login</button>
+    <output id="output"></output>
+  </body>
+</html>

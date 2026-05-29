@@ -1,0 +1,18 @@
+.body{
+    display: flex;
+    border-style: groove;
+    border: 5px solid;
+    gap: 30px;
+    justify-content: space-around;
+    height: 250px;
+    align-items: center;
+    border-image: linear-gradient( blue,red);
+}
+.div{
+    width: 100px;
+    height: 50px;
+    border: solid;
+    border-style: double;
+    flex-grow: 1;
+    flex-wrap: wrap;
+}

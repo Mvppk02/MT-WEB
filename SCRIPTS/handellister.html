@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+
+  <script>
+    let varer =[];
+    console.log(varer);
+    
+    function leggtil()
+    {
+      let vare = document.createElement("li");
+      vare.innerHTML = document.getElementById("legg").value;
+      varer.unshift(vare.innerHTML);
+     lagliste();
+    }
+
+    function slett()
+    {
+      //varer.splice(5-1,varer.length);
+      varer.splice(document.getElementById("legg").value,varer.length);
+      console.log(varer);
+    }
+
+    function lagliste()
+    {
+      for(let i=0;i<varer.length;i++)
+    {
+      let lister = document.createElement("li");
+      li.innerHTML= varer[i];
+      console.log("liste"+lister);
+      document.getElementById("liste").appendChild(lister);
+    }
+    }
+  </script>
+
+
+</head>
+<body>
+  <style>
+
+  </style>
+  <div>
+    <button onclick="leggtil()">Legg til</button>
+     <input type="text" id="legg">
+     <button onclick="slett()">Slett</button>
+  </div>
+  <ol id="liste"></ol>
+</body>
+</html>

@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MT-WEB - Portfolio</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e0e0e0;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #00d4ff, #0099ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #b0b0b0;
+            margin-bottom: 30px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 40px;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            color: #00d4ff;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            color: #b0b0b0;
+            font-size: 0.95rem;
+        }
+
+        .folder-section {
+            margin-bottom: 50px;
+            animation: fadeInUp 0.8s ease-out both;
+        }
+
+        .folder-title {
+            font-size: 1.4rem;
+            color: #00d4ff;
+            margin-bottom: 20px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .folder-count {
+            font-size: 0.85rem;
+            color: #808080;
+            font-weight: normal;
+        }
+
+        .pages-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+        }
+
+        .page-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 12px;
+            padding: 24px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .page-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(0, 212, 255, 0.8);
+            background: rgba(0, 212, 255, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.2);
+        }
+
+        .page-card h2 {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            color: #00d4ff;
+        }
+
+        .page-card p {
+            font-size: 0.9rem;
+            color: #b0b0b0;
+            margin-bottom: 16px;
+        }
+
+        .card-link {
+            display: inline-block;
+            padding: 8px 20px;
+            background: linear-gradient(135deg, #00d4ff, #0099ff);
+            color: #1a1a2e;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .card-link:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(0, 212, 255, 0.4);
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 60px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(0, 212, 255, 0.2);
+            color: #808080;
+            font-size: 0.9rem;
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5rem; }
+            .pages-grid { grid-template-columns: 1fr; }
+            .stats { flex-direction: column; gap: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>MT-WEB</h1>
+            <p class="subtitle">A collection of interactive web projects and experiments</p>
+        </header>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-number">23</div>
+                <div class="stat-label">Pages</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">4</div>
+                <div class="stat-label">Sections</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">∞</div>
+                <div class="stat-label">Creativity</div>
+            </div>
+        </div>
+
+        <!-- Root Pages -->
+        <div class="folder-section">
+            <div class="folder-title">📄 Root Pages <span class="folder-count">3 pages</span></div>
+            <div class="pages-grid">
+                <div class="page-card">
+                    <h2>🔄 Change Color</h2>
+                    <p>Interactive color changing experiment.</p>
+                    <a href="/changecolor.html" class="card-link">Open</a>
+                </div>
+                <div class="page-card">
+                    <h2>📅 Nyeark</h2>
+                    <p>Year calendar or date-related project.</p>
+                    <a href="/nyeark.html" class="card-link">Open</a>
+                </div>
+                <div class="page-card">
+                    <h2>✉️ Sendtall</h2>
+                    <p>Send numbers or data-related page.</p>
+                    <a href="/sendtall.htm" class="card-link">Open</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- HTMLS Section -->
+        <div class="folder-section">
+            <div class="folder-title">📁 HTMLS <span class="folder-count">2 pages</span></div>
+            <div class="pages-grid">
+                <div class="page-card">
+                    <h2>🏠 HTMLS Home</h2>
+                    <p>Landing page for the HTMLS collection — MVPPK0.2 project hub.</p>
+                    <a href="/HTMLS/index.html" class="card-link">Open</a>
+                </div>
+                <div class="page-card">
+                    <h2>🎬 My Animation 2</h2>
+                    <p>Second animation project with custom CSS and visual effects.</p>
+                    <a href="/HTMLS/myani2.html" class="card-link">Open</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- html-folder Section -->
+        <div class="folder-section">
+            <div class="folder-title">📂 html-folder <span class="folder-count">2 pages</span></div>
+            <div class="pages-grid">
+                <div class="page-card">
+                    <h2>🎨 Graving</h2>
+                    <p>Visual design showcase — creative artwork and artistic expression through design.</p>
+                    <a href="/html-folder/graving.html" class="card-link">Open</a>
+                </div>
+                <div class="page-card">
+                    <h2>🧮 Calculator</h2>
+                    <p>Interactive calculator tool with custom styling.</p>
+                    <a href="/html-folder/calc.html" class="card-link">Open</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCRIPTS Section -->
+        <div class="folder-section">
+            <div class="folder-title">📂 SCRIPTS <span class="folder-count">16 pages</span></div>
+            <div class="pages-grid">
+                <div class="page-card">
+                    <h2>📊 NVE Reservoir Dashboard</h2>
+                    <p>Norwegian Water Resources dashboard with real-time statistics and interactive charts.</p>
+                    <a href="/SCRIPTS/nve-reservoir-dashboard.html" class="card-link">Open</a>
+                </div>
+                <div class="page-card">
+                    <h2>📈 Reservoir Dashboard</h2>
+                    <p>Reservoir data visualization and statistics panel.</p>
+                    <a href="/SCRIPTS/reservoir-dashboard.html" class="card-link">Open</a>
+                </div>
+                <div class="page-card">
+                    <h2>🔐 Kripty</h2>
+                    <p>Cryptography-themed project — encryption and security concepts visualized.</p>
+                    <a href="/SCRIPTS/kripty.html" class="card-link">Open</a>
+                </div>
+                <div class="page-card">
+                    <h2>⚔️ THE Worriars</h2>
+                    <p>The Warriors project — bold, dynamic presentation with powerful visual storytelling.</p>
+                    <a href="/SCRIPTS/THEworriars.html" class="card-link">Open</a>
+                </div>
+                <div class="page-card">
+                    <h2>🧪 Testing</h2>
+                    <p>Experimental playground for testing new ideas, features, and web technologies.</p>
+                    <a href="/SCRIPTS/testing.html" class="card-link">Open</a>
+                </div>
+                <div class="page-card">
+                    <h2>🧮 Kalkulator</h2>
+                    <p>Calculator application with custom interface.</p>
+                    <a href="/SCRIPTS/kalkulator.html" class="card-link">Open</a>
+                </div>
+                <div class="page-card">
+                    <h2>🔄 Converter</h2>
+                    <p>Unit or data converter tool.</p>
+                    <a href="/SCRIPTS/converter.html" class="card-link">Open</a>
+                </div>
+                <div class="page-card">
+                    <h2>🧮 Calc</h2>
+                    <p>Simple calculator with CSS styling.</p>
+                    <a href="/SCRIPTS/calc.html" class="card-link">Open</a>
+                </div>
+                <div class="page-card">
+                    <h2>🎮 Spill</h2>
+                    <p>Game project — interactive browser game with custom styling.</p>
+                    <a href="/SCRIPTS/spill.html" class="card-link">Open</a>
+                </div>
+                <div class="page-card">
+                    <h2>🎵 Monkey Music</h2>
+                    <p>Music-related interactive project.</p>
+                    <a href="/SCRIPTS/monkeyusic.html" class="card-link">Open</a>
+                </div>
+                <div class="page-card">
+                    <h2>🎮 My Spill</h2>
+                    <p>Personal game project with custom CSS and gameplay mechanics.</p>
+                    <a href="/SCRIPTS/myspill.html" class="card-link">Open</a>
+                </div>
+                <div class="page-card">
+                    <h2>🎮 Try Hard</h2>
+                    <p>Challenge mode game — put your skills to the test.</p>
+                    <a href="/SCRIPTS/try-hard.html" class="card-link">Open</a>
+                </div>
+                <div class="page-card">
+                    <h2>📋 Handellister</h2>
+                    <p>Shopping lists or store listings management tool.</p>
+                    <a href="/SCRIPTS/handellister.html" class="card-link">Open</a>
+                </div>
+                <div class="page-card">
+                    <h2>📝 Testsub</h2>
+                    <p>Sub-testing page for experimenting with layout and content.</p>
+                    <a href="/SCRIPTS/testsub.html" class="card-link">Open</a>
+                </div>
+                <div class="page-card">
+                    <h2>📊 123321</h2>
+                    <p>Data visualization or numbered project.</p>
+                    <a href="/SCRIPTS/123321.html" class="card-link">Open</a>
+                </div>
+                <div class="page-card">
+                    <h2>🎲 Project</h2>
+                    <p>General project page for demonstrations.</p>
+                    <a href="/SCRIPTS/project.html" class="card-link">Open</a>
+                </div>
+                <div class="page-card">
+                    <h2>📦 Arrays</h2>
+                    <p>Array data structures visualization and manipulation tool.</p>
+                    <a href="/SCRIPTS/arrays.html" class="card-link">Open</a>
+                </div>
+                <div class="page-card">
+                    <h2>🔑 Authenticate</h2>
+                    <p>Authentication flow demonstration or login interface.</p>
+                    <a href="/SCRIPTS/authenticate.html" class="card-link">Open</a>
+                </div>
+                <div class="page-card">
+                    <h2>💾 Db</h2>
+                    <p>Database interface or data browsing tool.</p>
+                    <a href="/SCRIPTS/Db.html" class="card-link">Open</a>
+                </div>
+                <div class="page-card">
+                    <h2>📂 FT</h2>
+                    <p>Featured project or file tool page.</p>
+                    <a href="/SCRIPTS/FT.html" class="card-link">Open</a>
+                </div>
+                <div class="page-card">
+                    <h2>🔤 JavaScript</h2>
+                    <p>Interactive JavaScript demonstrations and examples.</p>
+                    <a href="/SCRIPTS/JAVASCRIPT.HTML" class="card-link">Open</a>
+                </div>
+                <div class="page-card">
+                    <h2>📝 Leggtil</h2>
+                    <p>Add or append functionality — data entry tool.</p>
+                    <a href="/SCRIPTS/leggtil.html" class="card-link">Open</a>
+                </div>
+                <div class="page-card">
+                    <h2>📍 Lokal</h2>
+                    <p>Local information or location-based project.</p>
+                    <a href="/SCRIPTS/lokal.html" class="card-link">Open</a>
+                </div>
+                <div class="page-card">
+                    <h2>📝 Oppgave Script</h2>
+                    <p>Assignment or task script — school/work related.</p>
+                    <a href="/SCRIPTS/oppgave-script.html" class="card-link">Open</a>
+                </div>
+                <div class="page-card">
+                    <h2>👋 Hei</h2>
+                    <p>Simple greeting or hello world page.</p>
+                    <a href="/SCRIPTS/hei.html" class="card-link">Open</a>
+                </div>
+                <div class="page-card">
+                    <h2>🤖 AI Spill</h2>
+                    <p>AI-themed game project.</p>
+                    <a href="/SCRIPTS/ai spill.html" class="card-link">Open</a>
+                </div>
+                <div class="page-card">
+                    <h2>✏️ Tesssting</h2>
+                    <p>Testing page with custom layout experiments.</p>
+                    <a href="/SCRIPTS/tesssting.hmtl" class="card-link">Open</a>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>&copy; 2026 MT-WEB. Built with HTML &amp; CSS | Hosted on Cloudflare Pages</p>
+        </footer>
+    </div>
+</body>
+</html>

@@ -1,0 +1,93 @@
+.sub-button {
+    background-color: rgba(200, 0, 0);
+    color: white;
+    border: none;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 16px;
+    padding-right: 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-right: 10px;
+    transition: opacity 0.15s;
+    vertical-align: top;
+}
+.sub-button:hover {
+    opacity: 0.7;
+}
+.sub-button:active {
+    opacity: 0.4;
+}
+.join-button {
+    background-color: white;
+    border-color: blue;
+    border-style: solid;
+    border-width: 1px;
+    color: blue;
+    border-radius: 2px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.15s, color 0.15s;
+    padding-top: 9px;
+    padding-bottom: 9px;
+    padding-left: 16px;
+    padding-right: 16px;
+}
+.join-button:hover {
+    opacity: 0.7;
+    background-color: blue;
+    color: white;
+}
+.join-button:active {
+    opacity: 0.4;
+}
+.tweet-button {
+    background-color: rgb(2, 158, 255);
+    color: white;
+    border: none;
+    width: 80px;
+    height: 35px;
+    margin-left: 10px;
+    border-radius: 17px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.15s, color 0.15s, box-shadow 0.15s;
+    padding-top: 9px;
+    padding-bottom: 10px;
+    padding-left: 16px;
+    padding-right: 16px;
+    vertical-align: top;
+}
+.tweet-button:hover {
+    box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.6);
+}
+.p-title {
+    font-family: Arial;
+    font-weight: bold;
+    font-style: italic;
+    width: 720px;
+}
+.apple-text {
+    margin-top: 50px;
+    background-color: red;
+    padding: 5px;
+    width: 200px;
+    color: white;
+    text-align: center;
+    margin-left: 10px;
+}
+.span-text {
+    color: blue;
+}
+.span-text:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+.search-bar {
+    font-size: 20px;
+    display: block;
+    margin-top: 20px;
+    width: 150px;
+    padding: 3px;
+}

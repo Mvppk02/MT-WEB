@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>TestSub</title>
+    <link rel="stylesheet" href="testsub.css">
+    
+    <script>
+      function oppstart()
+      {
+        let counter = document.getElementById("input").value;
+        let htmltext = "";
+        
+        for (let i = 0; i < counter; i++)
+        {
+          for (let j = 0; j < counter; j++)
+          {
+            htmltext += "<img src='emoji1.png'>";
+            console.log(j);
+            console.log(i);
+          }
+        }
+        document.getElementById("bilder").innerHTML = htmltext;
+      }
+    </script>
+  </head>
+  <body>
+    <div>
+      <h2>Front</h2>
+      <label for="input">Input rounds</label>
+    </div>
+    <div>
+      <input id="input" type="number">
+    </div>
+    <button id="firstbt" onclick="oppstart()">START</button>
+    <div id="bilder"></div>
+  </body>
+</html>

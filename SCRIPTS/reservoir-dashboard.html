@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Norsk reservoarstatistikk</title>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .region-selector {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .download-btn {
+            padding: 10px 22px;
+            border: 2px solid white;
+            background: rgba(255, 255, 255, 0.12);
+            color: white;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .download-btn:hover:not(:disabled) {
+            background: white;
+            color: #667eea;
+            transform: scale(1.03);
+        }
+
+        .download-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .region-btn {
+            padding: 10px 20px;
+            border: 2px solid white;
+            background: transparent;
+            color: white;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .region-btn:hover {
+            background: white;
+            color: #667eea;
+            transform: scale(1.05);
+        }
+
+        .region-btn.active {
+            background: white;
+            color: #667eea;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .stat {
+            margin: 12px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            border-radius: 5px;
+        }
+
+        .stat label {
+            display: block;
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .stat value {
+            display: block;
+            color: #333;
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+
+        .chart-container {
+            position: relative;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .chart-container h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .chart-axis-label {
+            position: absolute;
+            font-size: 0.95em;
+            font-weight: 700;
+            color: #333;
+            pointer-events: none;
+            opacity: 0.85;
+        }
+
+        .chart-axis-label.x-label {
+            bottom: 18px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .chart-axis-label.y-label {
+            top: 50%;
+            left: 18px;
+            transform: translateY(-50%) rotate(-90deg);
+            transform-origin: left center;
+        }
+
+        .chart-tooltip {
+            position: absolute;
+            display: none;
+            pointer-events: none;
+            background: rgba(0, 0, 0, 0.75);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            white-space: nowrap;
+            z-index: 10;
+        }
+
+        canvas {
+            width: 100%;
+            height: 420px;
+            display: block;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #667eea;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .percentage {
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .loading {
+            text-align: center;
+            color: white;
+            font-size: 1.2em;
+        }
+
+        .error {
+            background: #ff6b6b;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 0.9em;
+            }
+
+            th, td {
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Norsk reservoarstatistikk</h1>
+            <p>Sanntidsdata for elektrisitetsmagasiner fra NVE (JUSTIN)</p>
+        </header>
+
+        <div class="region-selector" id="regionSelector"></div>
+
+        <div class="controls">
+            <button id="downloadZipBtn" class="download-btn" disabled>Last ned data som ZIP</button>
+        </div>
+
+        <div class="dashboard" id="dashboard"></div>
+
+        <div class="chart-container">
+            <h2>Fyllingsnivå — siste 52 uker</h2>
+            <canvas id="trendChart"></canvas>
+            <div class="chart-axis-label x-label">Uke</div>
+            <div class="chart-axis-label y-label">Fyllingsgrad</div>
+            <div class="chart-tooltip" id="chartTooltip"></div>
+        </div>
+
+        <div class="table-container">
+            <h2>Siste data</h2>
+            <table id="dataTable">
+                <thead>
+                    <tr>
+                        <th>Dato</th>
+                        <th>Fyllingsgrad (%)</th>
+                        <th>Kapasitet (TWh)</th>
+                        <th>Fylling (TWh)</th>
+                        <th>Endring (%)</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const regionNames = {
+            '0': 'Totalt',
+            '1': 'Østlandet',
+            '2': 'Sørlandet',
+            '3': 'Vestlandet',
+            '4': 'Trøndelag',
+            '5': 'Nord-Norge'
+        };
+
+        let allData = {};
+        let currentRegion = null;
+        let scene = null;
+        let camera = null;
+        let renderer = null;
+        let barsGroup = null;
+        let animationId = null;
+        let raycaster = null;
+        let pointer = null;
+        let tooltip = null;
+
+        // Fetch data
+        async function loadData() {
+            try {
+                const response = await fetch('gh.json');
+                allData = await response.json();
+                
+                if (Object.keys(allData).length === 0) {
+                    document.body.innerHTML = '<div class="error">Ingen data tilgjengelig. Vennligst sørg for at gh.json er fylt.</div>';
+                    return;
+                }
+
+                initializeRegions();
+                selectRegion(Object.keys(allData)[0]);
+                document.getElementById('downloadZipBtn').disabled = false;
+            } catch (error) {
+                document.body.innerHTML = `<div class="error">Feil ved lasting av data: ${error.message}</div>`;
+                const downloadButton = document.getElementById('downloadZipBtn');
+                if (downloadButton) downloadButton.disabled = true;
+            }
+        }
+
+        async function downloadJsonAsZip() {
+            const downloadButton = document.getElementById('downloadZipBtn');
+            if (downloadButton) downloadButton.disabled = true;
+            try {
+                const jsonString = JSON.stringify(allData, null, 2);
+                const zip = new JSZip();
+                zip.file('gh.json', jsonString);
+                const content = await zip.generateAsync({ type: 'blob' });
+
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(content);
+                link.download = 'gh-json.zip';
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                URL.revokeObjectURL(link.href);
+            } catch (error) {
+                alert(`Kunne ikke laste ned ZIP: ${error.message}`);
+            } finally {
+                if (downloadButton) downloadButton.disabled = false;
+            }
+        }
+
+        function initializeRegions() {
+            const selector = document.getElementById('regionSelector');
+            selector.innerHTML = '';
+
+            Object.keys(allData).sort((a, b) => parseInt(a) - parseInt(b)).forEach(region => {
+                const btn = document.createElement('button');
+                btn.className = 'region-btn';
+                btn.textContent = regionNames[region] || `Region ${region}`;
+                btn.onclick = () => selectRegion(region);
+                selector.appendChild(btn);
+            });
+        }
+
+        function selectRegion(region) {
+            currentRegion = region;
+            
+            // Update button states
+            document.querySelectorAll('.region-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent === (regionNames[region] || `Region ${region}`)) {
+                    btn.classList.add('active');
+                }
+            });
+
+            updateDashboard();
+            updateChart();
+            updateTable();
+        }
+
+        function updateDashboard() {
+            const regionData = allData[currentRegion];
+            const latest = regionData[0];
+            
+            const dashboard = document.getElementById('dashboard');
+            dashboard.innerHTML = `
+                <div class="card">
+                    <h3>Nåværende status</h3>
+                    <div class="stat">
+                        <label>Fyllingsgrad</label>
+                        <value class="percentage">${(latest.fyllingsgrad * 100).toFixed(2)}%</value>
+                    </div>
+                    <div class="stat">
+                        <label>Kapasitet</label>
+                        <value>${latest.kapasitet_TWh.toFixed(3)} TWh</value>
+                    </div>
+                    <div class="stat">
+                        <label>Nå fylt</label>
+                        <value>${latest.fylling_TWh.toFixed(3)} TWh</value>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Ukentlig endring</h3>
+                    <div class="stat">
+                        <label>Endring i fyllingsgrad</label>
+                        <value style="color: ${latest.endring_fyllingsgrad > 0 ? '#27ae60' : '#e74c3c'}">${(latest.endring_fyllingsgrad * 100).toFixed(3)}%</value>
+                    </div>
+                    <div class="stat">
+                        <label>Fylling forrige uke</label>
+                        <value>${(latest.fyllingsgrad_forrige_uke * 100).toFixed(2)}%</value>
+                    </div>
+                    <div class="stat">
+                        <label>Sist oppdatert</label>
+                        <value>${new Date(latest.dato_Id).toLocaleDateString()}</value>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Statistikk</h3>
+                    <div class="stat">
+                        <label>Totalt antall poster</label>
+                        <value>${regionData.length}</value>
+                    </div>
+                    <div class="stat">
+                        <label>Datoperiode</label>
+                        <value>${new Date(regionData[regionData.length - 1].dato_Id).getFullYear()} - ${new Date(regionData[0].dato_Id).getFullYear()}</value>
+                    </div>
+                    <div class="stat">
+                        <label>Regionstype</label>
+                        <value>${regionData[0].omrType}</value>
+                    </div>
+                </div>
+            `;
+        }
+
+        function init3DChart() {
+            const canvas = document.getElementById('trendChart');
+            renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
+
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x000000, 0);
+
+            camera = new THREE.PerspectiveCamera(45, canvas.clientWidth / canvas.clientHeight, 0.1, 2000);
+            camera.position.set(0, 40, 120);
+            camera.lookAt(0, 0, 0);
+
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+            scene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(50, 80, 100);
+            scene.add(directionalLight);
+
+            barsGroup = new THREE.Group();
+            scene.add(barsGroup);
+
+            const floor = new THREE.Mesh(
+                new THREE.PlaneGeometry(120, 80),
+                new THREE.MeshPhongMaterial({ color: 0xf8f9fa, opacity: 0.4, transparent: true })
+            );
+            floor.rotation.x = -Math.PI / 2;
+            floor.position.y = -0.01;
+            scene.add(floor);
+
+            raycaster = new THREE.Raycaster();
+            pointer = new THREE.Vector2();
+            tooltip = document.getElementById('chartTooltip');
+
+            const rendererCanvas = renderer.domElement;
+            rendererCanvas.addEventListener('pointermove', onPointerMove);
+            rendererCanvas.addEventListener('pointerleave', () => {
+                tooltip.style.display = 'none';
+            });
+
+            window.addEventListener('resize', onWindowResize);
+            animate3D();
+        }
+
+        function onWindowResize() {
+            if (!renderer || !camera) return;
+            const canvas = renderer.domElement;
+            const width = canvas.parentElement.clientWidth;
+            const height = canvas.parentElement.clientHeight;
+            renderer.setSize(width, height, false);
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+        }
+
+        function animate3D() {
+            animationId = requestAnimationFrame(animate3D);
+            if (barsGroup) {
+                barsGroup.rotation.y += 0.003;
+            }
+            renderer.render(scene, camera);
+        }
+
+        function updateChart() {
+            const regionData = allData[currentRegion];
+            const chartData = regionData.slice(0, 52).reverse(); // Last 52 weeks
+
+            if (!scene) {
+                init3DChart();
+            }
+
+            barsGroup.clear();
+
+            const barWidth = 1.5;
+            const barDepth = 6;
+            const gap = 0.5;
+            const totalWidth = chartData.length * (barWidth + gap);
+
+            chartData.forEach((dataPoint, index) => {
+                const fillPercent = dataPoint.fyllingsgrad * 100;
+                const height = Math.max(1.5, fillPercent / 2);
+                const material = new THREE.MeshPhongMaterial({
+                    color: fillPercent >= 75 ? 0x2ecc71 : fillPercent >= 50 ? 0xf1c40f : 0xe74c3c,
+                    shininess: 60
+                });
+
+                const geometry = new THREE.BoxGeometry(barWidth, height, barDepth);
+                const bar = new THREE.Mesh(geometry, material);
+                bar.position.set(index * (barWidth + gap) - totalWidth / 2 + barWidth / 2, height / 2, 0);
+                bar.userData = {
+                    weekLabel: new Date(dataPoint.dato_Id).toLocaleDateString(),
+                    fillPercent: fillPercent
+                };
+                barsGroup.add(bar);
+            });
+        }
+
+        function onPointerMove(event) {
+            if (!renderer || !camera || !raycaster) return;
+
+            const canvas = renderer.domElement;
+            const rect = canvas.getBoundingClientRect();
+            pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+            pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+            raycaster.setFromCamera(pointer, camera);
+            const intersects = raycaster.intersectObjects(barsGroup.children, false);
+
+            if (intersects.length > 0) {
+                const hit = intersects[0].object;
+                const data = hit.userData;
+                tooltip.style.display = 'block';
+                tooltip.style.left = `${event.clientX - rect.left + 12}px`;
+                tooltip.style.top = `${event.clientY - rect.top + 12}px`;
+                tooltip.innerHTML = `<strong>${data.weekLabel}</strong><br>${data.fillPercent.toFixed(2)} %`;
+            } else {
+                tooltip.style.display = 'none';
+            }
+        }
+
+        function updateTable() {
+            const regionData = allData[currentRegion];
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            regionData.slice(0, 20).forEach(record => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${new Date(record.dato_Id).toLocaleDateString()}</td>
+                    <td class="percentage">${(record.fyllingsgrad * 100).toFixed(2)}%</td>
+                    <td>${record.kapasitet_TWh.toFixed(3)}</td>
+                    <td>${record.fylling_TWh.toFixed(3)}</td>
+                    <td style="color: ${record.endring_fyllingsgrad > 0 ? '#27ae60' : '#e74c3c'}">${(record.endring_fyllingsgrad * 100).toFixed(3)}%</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Load data on page load
+        window.addEventListener('load', loadData);
+    </script>
+</body>
+</html>
