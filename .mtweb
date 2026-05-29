@@ -35,7 +35,7 @@
         "media-images": true,
         "media-banners": true,
         "media-datafiles": true,
-        "media-stylesheets": true
+        "media-stylesheets": false
       }
     }
   }
