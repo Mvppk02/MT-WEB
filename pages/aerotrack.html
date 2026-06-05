@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AeroTrack // Real-Time Telemetry & Location Sharing</title>
+  <!-- Google Fonts: Outfit & Space Grotesk -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Leaflet Map CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+A78e64Ia0r6CRremF7c37wNVUAd515="
+     crossorigin=""/>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- PeerJS WebRTC Client -->
+  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+
+  <link rel="stylesheet" href="index.css">
+</head>
+<body class="dark-theme">
+  <!-- Main Grid Layout -->
+  <div class="app-container">
+    
+    <!-- Collapsible/Floating Panel -->
+    <aside class="dashboard-panel" id="dashboardPanel">
+      <header class="panel-header">
+        <div class="logo-area">
+          <div class="logo-pulse"></div>
+          <h1>AeroTrack</h1>
+          <span class="badge live-badge">LIVE</span>
+        </div>
+        <p class="subtitle">WebRTC Geo-Telemetry Matrix</p>
+      </header>
+
+      <!-- Connection Status Banner -->
+      <div class="status-banner offline" id="systemStatus">
+        <i data-lucide="radio-receiver" class="status-icon"></i>
+        <span class="status-text">SYSTEM STANDBY</span>
+      </div>
+
+      <!-- Main Action Controls -->
+      <section class="section action-section">
+        <div class="btn-group-row">
+          <button id="btnToggleTrack" class="btn btn-primary btn-glow">
+            <i data-lucide="play" class="btn-icon"></i>
+            <span>Start Tracking</span>
+          </button>
+          <button id="btnSimulate" class="btn btn-secondary">
+            <i data-lucide="navigation-2" class="btn-icon"></i>
+            <span>Simulate Route</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Dynamic Speedometer Display -->
+      <section class="section telemetry-gauge-section">
+        <div class="speedometer-container">
+          <svg class="speed-gauge" viewBox="0 0 100 100">
+            <circle class="gauge-bg" cx="50" cy="50" r="45"></circle>
+            <circle class="gauge-fill" id="speedGaugeFill" cx="50" cy="50" r="45" stroke-dasharray="283" stroke-dashoffset="283"></circle>
+          </svg>
+          <div class="speed-readout">
+            <span class="speed-value" id="valSpeed">0.0</span>
+            <span class="speed-unit">KM/H</span>
+          </div>
+        </div>
+        <div class="telemetry-compact-grid">
+          <div class="telemetry-card">
+            <span class="card-label">DISTANCE</span>
+            <span class="card-value" id="valDistance">0.00 km</span>
+          </div>
+          <div class="telemetry-card">
+            <span class="card-label">ALTITUDE</span>
+            <span class="card-value" id="valAltitude">-- m</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Advanced Telemetry Data Grid -->
+      <section class="section data-grid-section">
+        <h2 class="section-title">Telemetry Stream</h2>
+        <div class="data-grid">
+          <div class="data-item">
+            <div class="data-header">
+              <i data-lucide="compass"></i>
+              <span>HEADING</span>
+            </div>
+            <span class="data-val" id="valHeading">--°</span>
+          </div>
+          <div class="data-item">
+            <div class="data-header">
+              <i data-lucide="gauge"></i>
+              <span>AVG SPEED</span>
+            </div>
+            <span class="data-val" id="valAvgSpeed">0.0 km/h</span>
+          </div>
+          <div class="data-item">
+            <div class="data-header">
+              <i data-lucide="timer"></i>
+              <span>DURATION</span>
+            </div>
+            <span class="data-val" id="valDuration">00:00:00</span>
+          </div>
+          <div class="data-item">
+            <div class="data-header">
+              <i data-lucide="activity"></i>
+              <span>ACCURACY</span>
+            </div>
+            <span class="data-val" id="valAccuracy">-- m</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Peer sharing details -->
+      <section class="section peer-section">
+        <h2 class="section-title">Peer-to-Peer Relay</h2>
+        <div class="peer-box">
+          <div class="peer-id-row">
+            <span class="peer-label">YOUR FREQUENCY ID:</span>
+            <span class="peer-id" id="peerIdDisplay">GENERATING...</span>
+          </div>
+          <p class="peer-desc">Share your real-time frequency so others can track you on their map, or input a friend's ID below.</p>
+          
+          <div class="share-actions">
+            <button id="btnShareSession" class="btn btn-accent btn-full">
+              <i data-lucide="share-2" class="btn-icon"></i>
+              <span>Copy Shareable Map Link</span>
+            </button>
+          </div>
+
+          <div class="divider"><span>OR JOIN FREQUENCY</span></div>
+
+          <div class="join-input-group">
+            <input type="text" id="inputPeerId" placeholder="Paste Peer ID..." aria-label="Peer ID to Connect">
+            <button id="btnConnectPeer" class="btn btn-connect">
+              <i data-lucide="plug-2"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Connected Peers List -->
+        <div class="active-peers-panel hidden" id="activePeersPanel">
+          <h3 class="panel-subtitle">CONNECTED PEERS</h3>
+          <div class="peers-list" id="peersListContainer">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Data Export / Management -->
+      <section class="section export-section">
+        <h2 class="section-title">Telemetry Export</h2>
+        <div class="btn-group-row">
+          <button id="btnExportGeoJSON" class="btn btn-outline btn-full" disabled>
+            <i data-lucide="file-json" class="btn-icon"></i>
+            <span>GeoJSON</span>
+          </button>
+          <button id="btnExportGPX" class="btn btn-outline btn-full" disabled>
+            <i data-lucide="map" class="btn-icon"></i>
+            <span>GPX Route</span>
+          </button>
+        </div>
+        <button id="btnClearData" class="btn btn-danger btn-full margin-top-sm">
+          <i data-lucide="trash-2" class="btn-icon"></i>
+          <span>Clear Track History</span>
+        </button>
+      </section>
+    </aside>
+
+    <!-- Map Area Container -->
+    <main class="map-viewport">
+      <div id="map"></div>
+
+      <!-- Floating Map Utility Overlays -->
+      <div class="map-controls">
+        <button class="map-ctrl-btn" id="btnThemeToggle" title="Toggle Map Theme">
+          <i data-lucide="sun" id="themeIcon"></i>
+        </button>
+        <button class="map-ctrl-btn" id="btnCenterMap" title="Center on Current Position">
+          <i data-lucide="crosshair"></i>
+        </button>
+      </div>
+
+      <!-- Collapsible Panel Toggle Button for Mobile -->
+      <button class="mobile-panel-toggle" id="mobilePanelToggle">
+        <i data-lucide="chevron-up" id="toggleChevron"></i>
+      </button>
+    </main>
+  </div>
+
+  <!-- Leaflet Map JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
+  <!-- Main Script -->
+  <script type="module" src="main.js"></script>
+</body>
+</html>
