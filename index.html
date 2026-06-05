@@ -5,12 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MT-WEB - Portfolio</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
@@ -18,19 +13,8 @@
             line-height: 1.6;
             min-height: 100vh;
         }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 40px 20px;
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 60px;
-            animation: fadeInDown 0.8s ease-out;
-        }
-
+        .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+        header { text-align: center; margin-bottom: 60px; }
         h1 {
             font-size: 3.5rem;
             margin-bottom: 10px;
@@ -39,50 +23,28 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-
-        .subtitle {
-            font-size: 1.2rem;
-            color: #b0b0b0;
-            margin-bottom: 30px;
-        }
-
+        .subtitle { font-size: 1.2rem; color: #b0b0b0; margin-bottom: 30px; }
         .pages-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 30px;
             margin-bottom: 40px;
-            animation: fadeInUp 0.8s ease-out 0.2s both;
         }
-
         .page-card {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(0, 212, 255, 0.3);
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(0,212,255,0.3);
             border-radius: 12px;
             padding: 30px;
             transition: all 0.3s ease;
-            cursor: pointer;
-            backdrop-filter: blur(10px);
         }
-
         .page-card:hover {
             transform: translateY(-5px);
-            border-color: rgba(0, 212, 255, 0.8);
-            background: rgba(0, 212, 255, 0.1);
-            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.2);
+            border-color: rgba(0,212,255,0.8);
+            background: rgba(0,212,255,0.1);
+            box-shadow: 0 10px 30px rgba(0,212,255,0.2);
         }
-
-        .page-card h2 {
-            font-size: 1.8rem;
-            margin-bottom: 15px;
-            color: #00d4ff;
-        }
-
-        .page-card p {
-            font-size: 0.95rem;
-            color: #b0b0b0;
-            margin-bottom: 20px;
-        }
-
+        .page-card h2 { font-size: 1.8rem; margin-bottom: 15px; color: #00d4ff; }
+        .page-card p { font-size: 0.95rem; color: #b0b0b0; margin-bottom: 20px; }
         .card-link {
             display: inline-block;
             padding: 10px 25px;
@@ -96,79 +58,18 @@
             cursor: pointer;
             font-size: 0.95rem;
         }
-
-        .card-link:hover {
-            transform: scale(1.05);
-            box-shadow: 0 5px 20px rgba(0, 212, 255, 0.4);
-        }
-
+        .card-link:hover { transform: scale(1.05); box-shadow: 0 5px 20px rgba(0,212,255,0.4); }
         footer {
             text-align: center;
             margin-top: 60px;
             padding-top: 30px;
-            border-top: 1px solid rgba(0, 212, 255, 0.2);
+            border-top: 1px solid rgba(0,212,255,0.2);
             color: #808080;
             font-size: 0.9rem;
         }
-
-        .stats {
-            display: flex;
-            justify-content: center;
-            gap: 40px;
-            margin-bottom: 40px;
-            animation: fadeInUp 0.8s ease-out 0.4s both;
-        }
-
-        .stat {
-            text-align: center;
-        }
-
-        .stat-number {
-            font-size: 2.5rem;
-            color: #00d4ff;
-            font-weight: bold;
-        }
-
-        .stat-label {
-            color: #b0b0b0;
-            font-size: 0.95rem;
-        }
-
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
         @media (max-width: 768px) {
-            h1 {
-                font-size: 2.5rem;
-            }
-
-            .pages-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .stats {
-                flex-direction: column;
-                gap: 20px;
-            }
+            h1 { font-size: 2.5rem; }
+            .pages-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -179,55 +80,46 @@
             <p class="subtitle">A collection of interactive web projects and experiments</p>
         </header>
 
-        <div class="stats">
-            <div class="stat">
-                <div class="stat-number">5</div>
-                <div class="stat-label">Projects</div>
-            </div>
-            <div class="stat">
-                <div class="stat-number">100%</div>
-                <div class="stat-label">HTML/CSS</div>
-            </div>
-            <div class="stat">
-                <div class="stat-number">∞</div>
-                <div class="stat-label">Creativity</div>
-            </div>
-        </div>
-
         <div class="pages-grid">
             <div class="page-card">
-                <h2>🎨 Graving</h2>
-                <p>Explore stunning visual designs and creative artwork. A showcase of design capabilities and artistic expression.</p>
-                <a href="/graving.html" class="card-link">View Project</a>
+                <h2>Graving</h2>
+                <p>Explore stunning visual designs and creative artwork.</p>
+                <a href="pages/graving.html" class="card-link">View Project</a>
             </div>
 
             <div class="page-card">
-                <h2>🔐 Kripty</h2>
-                <p>A cryptography-themed project featuring advanced encryption and security concepts visualized through interactive design.</p>
-                <a href="/kripty.html" class="card-link">View Project</a>
+                <h2>Calculator</h2>
+                <p>A functional calculator built with HTML, CSS and JavaScript.</p>
+                <a href="pages/calc.html" class="card-link">View Project</a>
             </div>
 
             <div class="page-card">
-                <h2>⚔️ Worriars</h2>
-                <p>The Warriors project - A bold, dynamic presentation combining strategic design with powerful visual storytelling.</p>
-                <a href="/THEworriars.html" class="card-link">View Project</a>
+                <h2>Change Color</h2>
+                <p>Interactive color changing experiment.</p>
+                <a href="pages/changecolor.html" class="card-link">View Project</a>
             </div>
 
             <div class="page-card">
-                <h2>🧪 Testing</h2>
-                <p>An experimental playground for testing new ideas, features, and web technologies in action.</p>
-                <a href="/testing.html" class="card-link">View Project</a>
+                <h2>Testing</h2>
+                <p>An experimental playground for testing new ideas and web technologies.</p>
+                <a href="pages/test.html" class="card-link">View Project</a>
             </div>
 
             <div class="page-card">
-                <h2>📊 NVE Reservoir</h2>
-                <p>Norwegian Water Resources dashboard featuring real-time statistics and reservoir data visualization with interactive charts.</p>
-                <a href="/SCRIPTS/nve-reservoir-dashboard.html" class="card-link">View Dashboard</a>
+                <h2>NVE Reservoir</h2>
+                <p>Norwegian Water Resources dashboard with reservoir data visualization.</p>
+                <a href="pages/nve-reservoir-dashboard.html" class="card-link">View Dashboard</a>
+            </div>
+
+            <div class="page-card">
+                <h2>Device Tracker</h2>
+                <p>Monitor connected devices and their status.</p>
+                <a href="pages/device-tracker.html" class="card-link">View Tracker</a>
             </div>
         </div>
 
         <footer>
-            <p>&copy; 2026 MT-WEB. Built with HTML & CSS | Hosted on Cloudflare Pages</p>
+            <p>&copy; 2026 MT-WEB. Built with HTML & CSS | Hosted on GitHub Pages</p>
         </footer>
     </div>
 </body>
