@@ -13,7 +13,7 @@
             min-height: 100vh;
             padding: 40px 20px;
         }
-        .container { max-width: 1000px; margin: 0 auto; }
+        .container { max-width: 1100px; margin: 0 auto; }
         h1 {
             font-size: 2.5rem;
             margin-bottom: 5px;
@@ -42,6 +42,20 @@
         .scanning { color: #00d4ff; font-size: 0.85rem; animation: pulse 1s infinite; }
         @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
 
+        select.device-select {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(0,212,255,0.3);
+            color: #e0e0e0;
+            padding: 9px 16px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            min-width: 220px;
+            outline: none;
+        }
+        select.device-select option { background: #1a1a2e; color: #e0e0e0; }
+        select.device-select:focus { border-color: #00d4ff; }
+
         .status-bar { display: flex; gap: 16px; margin-bottom: 25px; flex-wrap: wrap; }
         .status-item {
             background: rgba(255,255,255,0.04);
@@ -49,7 +63,7 @@
             border-radius: 8px;
             padding: 14px 20px;
             flex: 1;
-            min-width: 150px;
+            min-width: 140px;
         }
         .status-item .label { font-size: 0.7rem; color: #606060; text-transform: uppercase; letter-spacing: 0.5px; }
         .status-item .value { font-size: 1.5rem; color: #00d4ff; font-weight: 700; margin-top: 2px; }
@@ -57,8 +71,10 @@
         .status-item .value.offline { color: #ff4444; }
         .status-item .value.unknown { color: #ffaa00; }
 
-        .main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
         @media (max-width: 768px) { .main-grid { grid-template-columns: 1fr; } }
+
+        .full-width { grid-column: 1 / -1; }
 
         .panel {
             background: rgba(255,255,255,0.03);
@@ -68,23 +84,13 @@
         }
         .panel h2 { font-size: 1rem; color: #00d4ff; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.5px; }
 
-        .device-list { display: flex; flex-direction: column; gap: 10px; }
-        .device-card {
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(0,212,255,0.12);
-            border-radius: 8px;
-            padding: 14px 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: border-color 0.2s;
-        }
-        .device-card:hover { border-color: rgba(0,212,255,0.4); }
-        .device-info { flex: 1; }
-        .device-info h3 { color: #e0e0e0; font-size: 0.95rem; margin-bottom: 3px; }
-        .device-info p { color: #707070; font-size: 0.78rem; }
-        .device-meta { display: flex; gap: 8px; align-items: center; }
-        .device-status {
+        /* Device detail */
+        .device-detail { display: none; }
+        .device-detail.active { display: block; }
+        .detail-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+        .detail-icon { font-size: 2rem; }
+        .detail-header h3 { font-size: 1.3rem; color: #e0e0e0; }
+        .detail-header .device-status {
             padding: 4px 12px;
             border-radius: 12px;
             font-size: 0.72rem;
@@ -94,20 +100,46 @@
         .device-status.online { background: rgba(0,255,136,0.12); color: #00ff88; border: 1px solid rgba(0,255,136,0.25); }
         .device-status.offline { background: rgba(255,68,68,0.12); color: #ff4444; border: 1px solid rgba(255,68,68,0.25); }
         .device-status.unknown { background: rgba(255,170,0,0.12); color: #ffaa00; border: 1px solid rgba(255,170,0,0.25); }
-        .device-type-icon { font-size: 1.2rem; margin-right: 8px; }
 
-        .log-list { display: flex; flex-direction: column; gap: 6px; max-height: 400px; overflow-y: auto; }
+        .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .detail-row {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(0,212,255,0.1);
+            border-radius: 6px;
+            padding: 12px 14px;
+        }
+        .detail-row .d-label { font-size: 0.7rem; color: #606060; text-transform: uppercase; letter-spacing: 0.5px; }
+        .detail-row .d-value { font-size: 0.95rem; color: #e0e0e0; margin-top: 3px; font-family: monospace; }
+
+        /* Device list */
+        .device-list { display: flex; flex-direction: column; gap: 10px; max-height: 350px; overflow-y: auto; }
+        .device-list::-webkit-scrollbar { width: 4px; }
+        .device-list::-webkit-scrollbar-track { background: transparent; }
+        .device-list::-webkit-scrollbar-thumb { background: rgba(0,212,255,0.3); border-radius: 2px; }
+        .device-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(0,212,255,0.12);
+            border-radius: 8px;
+            padding: 14px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .device-card:hover { border-color: rgba(0,212,255,0.4); background: rgba(0,212,255,0.05); }
+        .device-card.selected { border-color: #00d4ff; background: rgba(0,212,255,0.08); }
+        .device-info h3 { color: #e0e0e0; font-size: 0.95rem; margin-bottom: 3px; }
+        .device-info p { color: #707070; font-size: 0.78rem; }
+
+        /* Log */
+        .log-list { display: flex; flex-direction: column; gap: 6px; max-height: 300px; overflow-y: auto; }
         .log-list::-webkit-scrollbar { width: 4px; }
         .log-list::-webkit-scrollbar-track { background: transparent; }
         .log-list::-webkit-scrollbar-thumb { background: rgba(0,212,255,0.3); border-radius: 2px; }
         .log-entry {
-            display: flex;
-            gap: 10px;
-            padding: 8px 10px;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            background: rgba(255,255,255,0.02);
-            border-left: 2px solid transparent;
+            display: flex; gap: 10px; padding: 8px 10px; border-radius: 6px;
+            font-size: 0.8rem; background: rgba(255,255,255,0.02); border-left: 2px solid transparent;
         }
         .log-entry.info { border-left-color: #00d4ff; }
         .log-entry.success { border-left-color: #00ff88; }
@@ -116,6 +148,35 @@
         .log-time { color: #505050; font-family: monospace; white-space: nowrap; }
         .log-msg { color: #b0b0b0; }
         .log-msg strong { color: #e0e0e0; }
+
+        /* Map */
+        .map-container {
+            width: 100%;
+            height: 350px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            border: 1px solid rgba(0,212,255,0.15);
+            overflow: hidden;
+            position: relative;
+        }
+        .map-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .map-overlay {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(26,26,46,0.85);
+            border: 1px solid rgba(0,212,255,0.3);
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 0.75rem;
+            color: #b0b0b0;
+            pointer-events: none;
+        }
+        .map-overlay strong { color: #00d4ff; }
 
         .empty-state { color: #505050; font-size: 0.85rem; text-align: center; padding: 30px 0; }
     </style>
@@ -127,13 +188,16 @@
 
         <div class="controls">
             <button class="refresh-btn" id="refreshBtn" onclick="scanDevices()">Scan Network</button>
+            <select class="device-select" id="deviceSelect" onchange="selectDevice(this.value)">
+                <option value="">-- Select a device --</option>
+            </select>
             <span class="last-updated" id="lastUpdated">Last scan: --</span>
             <span class="scanning" id="scanningIndicator" style="display:none">Scanning...</span>
         </div>
 
         <div class="status-bar">
             <div class="status-item">
-                <div class="label">Total Devices</div>
+                <div class="label">Total</div>
                 <div class="value" id="totalDevices">0</div>
             </div>
             <div class="status-item">
@@ -148,6 +212,12 @@
                 <div class="label">Unknown</div>
                 <div class="value unknown" id="unknownCount">0</div>
             </div>
+        </div>
+
+        <!-- Device detail panel (shown when device selected) -->
+        <div class="panel full-width" id="detailPanel" style="display:none">
+            <h2>Device Information</h2>
+            <div id="detailContent"></div>
         </div>
 
         <div class="main-grid">
@@ -165,16 +235,26 @@
                 </div>
             </div>
         </div>
+
+        <!-- Map panel -->
+        <div class="panel full-width">
+            <h2>Location Map</h2>
+            <div class="map-container" id="mapContainer">
+                <iframe id="mapFrame" src="https://www.openstreetmap.org/export/embed.html?bbox=-180%2C-85%2C180%2C85&layer=mapnik" allowfullscreen></iframe>
+                <div class="map-overlay" id="mapOverlay">Select a device to show its location</div>
+            </div>
+        </div>
     </div>
 
     <script>
         const logs = [];
         const devices = new Map();
+        let selectedDeviceId = null;
 
-        function addLog(msg, type = 'info') {
-            const now = new Date();
-            const time = now.toLocaleTimeString('en-US', { hour12: false });
-            logs.unshift({ time, msg, type });
+        function addLog(msg, type) {
+            type = type || 'info';
+            const time = new Date().toLocaleTimeString('en-US', { hour12: false });
+            logs.unshift({ time: time, msg: msg, type: type });
             if (logs.length > 50) logs.pop();
             renderLogs();
         }
@@ -185,135 +265,195 @@
                 list.innerHTML = '<p class="empty-state">No activity yet</p>';
                 return;
             }
-            list.innerHTML = logs.map(l => `
-                <div class="log-entry ${l.type}">
-                    <span class="log-time">${l.time}</span>
-                    <span class="log-msg">${l.msg}</span>
-                </div>
-            `).join('');
+            list.innerHTML = logs.map(function(l) {
+                return '<div class="log-entry ' + l.type + '">'
+                    + '<span class="log-time">' + l.time + '</span>'
+                    + '<span class="log-msg">' + l.msg + '</span></div>';
+            }).join('');
         }
 
         function getLocalIPs() {
-            return new Promise((resolve) => {
-                const ips = [];
-                const pc = new RTCPeerConnection({ iceServers: [] });
+            return new Promise(function(resolve) {
+                var ips = [];
+                var pc = new RTCPeerConnection({ iceServers: [] });
                 pc.createDataChannel('');
-                pc.createOffer().then(o => pc.setLocalDescription(o));
-                pc.onicecandidate = (ice) => {
+                pc.createOffer().then(function(o) { pc.setLocalDescription(o); });
+                pc.onicecandidate = function(ice) {
                     if (!ice || !ice.candidate || !ice.candidate.candidate) {
                         pc.close();
                         resolve(ips);
                         return;
                     }
-                    const ipMatch = /([0-9]{1,3}\.){3}[0-9]{1,3}/.exec(ice.candidate.candidate);
-                    if (ipMatch && !ips.includes(ipMatch[0])) {
+                    var ipMatch = /([0-9]{1,3}\.){3}[0-9]{1,3}/.exec(ice.candidate.candidate);
+                    if (ipMatch && ips.indexOf(ipMatch[0]) === -1) {
                         ips.push(ipMatch[0]);
                     }
                 };
-                setTimeout(() => { pc.close(); resolve(ips); }, 2000);
+                setTimeout(function() { pc.close(); resolve(ips); }, 2000);
             });
         }
 
+        function getBrowserInfo() {
+            var ua = navigator.userAgent;
+            if (ua.indexOf('Firefox') !== -1) return 'Firefox';
+            if (ua.indexOf('Edg') !== -1) return 'Edge';
+            if (ua.indexOf('Brave') !== -1) return 'Brave';
+            if (ua.indexOf('Chrome') !== -1) return 'Chrome';
+            if (ua.indexOf('Safari') !== -1) return 'Safari';
+            return 'Unknown';
+        }
+
+        function getOSInfo() {
+            var p = navigator.platform;
+            var ua = navigator.userAgent;
+            if (ua.indexOf('Win') !== -1) return 'Windows';
+            if (ua.indexOf('Mac') !== -1) return 'macOS';
+            if (ua.indexOf('Linux') !== -1) return 'Linux';
+            if (ua.indexOf('Android') !== -1) return 'Android';
+            if (ua.indexOf('iPhone') !== -1 || ua.indexOf('iPad') !== -1) return 'iOS';
+            return p || 'Unknown';
+        }
+
+        function getDeviceTypeIcon(type) {
+            var icons = {
+                browser: '\u{1F310}',
+                emulator: '\u{1F4F1}',
+                mobile: '\u{1F4F1}',
+                desktop: '\u{1F5A5}\uFE0F',
+                server: '\u{1F4BB}',
+                iot: '\u{1F4E1}'
+            };
+            return icons[type] || '\u{1F4F1}';
+        }
+
         async function scanDevices() {
-            const btn = document.getElementById('refreshBtn');
-            const indicator = document.getElementById('scanningIndicator');
+            var btn = document.getElementById('refreshBtn');
+            var indicator = document.getElementById('scanningIndicator');
             btn.disabled = true;
             indicator.style.display = 'inline';
 
             addLog('Starting network scan...', 'info');
-            const scanStart = Date.now();
+            var scanStart = Date.now();
 
-            // Detect this device
-            const thisDevice = {
+            // This device
+            var thisDevice = {
+                id: 'this',
                 name: 'This Device',
                 type: 'browser',
                 typeLabel: 'Browser',
-                icon: '🌐',
+                icon: getDeviceTypeIcon('browser'),
                 ip: '127.0.0.1',
                 status: 'online',
-                details: getBrowserInfo(),
-                lastSeen: new Date()
+                browser: getBrowserInfo(),
+                os: getOSInfo(),
+                platform: navigator.platform,
+                cores: navigator.hardwareConcurrency || '?',
+                memory: navigator.deviceMemory ? navigator.deviceMemory + ' GB' : '?',
+                connection: '?',
+                downlink: '?',
+                language: navigator.language,
+                cookies: navigator.cookieEnabled ? 'Yes' : 'No',
+                online: navigator.onLine ? 'Yes' : 'No',
+                lastSeen: new Date(),
+                lat: null,
+                lon: null
             };
-            devices.set('this', thisDevice);
-            addLog(`Detected <strong>This Device</strong> — ${thisDevice.details}`, 'success');
 
-            // Get local IPs via WebRTC
+            devices.set('this', thisDevice);
+            addLog('Detected <strong>This Device</strong> — ' + thisDevice.browser, 'success');
+
+            // WebRTC local IPs
             try {
-                const ips = await getLocalIPs();
+                var ips = await getLocalIPs();
                 if (ips.length > 0) {
-                    addLog(`Local IPs discovered: <strong>${ips.join(', ')}</strong>`, 'info');
                     thisDevice.ip = ips[0];
+                    addLog('Local IPs: <strong>' + ips.join(', ') + '</strong>', 'info');
                 } else {
-                    addLog('No local IPs detected via WebRTC', 'warn');
+                    addLog('No local IPs via WebRTC', 'warn');
                 }
             } catch (e) {
-                addLog('WebRTC IP detection failed', 'warn');
-            }
-
-            // Check MuMuPlayer emulator (common ADB port)
-            const emuDevice = {
-                name: 'MuMuPlayer',
-                type: 'emulator',
-                typeLabel: 'Android Emulator',
-                icon: '📱',
-                ip: '127.0.0.1:5555',
-                status: 'unknown',
-                details: 'ADB port 5555',
-                lastSeen: null
-            };
-            devices.set('mumu', emuDevice);
-            addLog('Checking <strong>MuMuPlayer</strong> emulator (ADB 5555)...', 'info');
-
-            // Try to detect ADB via fetch to localhost (won't work from browser but logs the attempt)
-            try {
-                const controller = new AbortController();
-                setTimeout(() => controller.abort(), 1500);
-                await fetch('http://127.0.0.1:5037/server', { signal: controller.signal, mode: 'no-cors' });
-                emuDevice.status = 'online';
-                emuDevice.lastSeen = new Date();
-                addLog('<strong>MuMuPlayer</strong> responded — status online', 'success');
-            } catch (e) {
-                emuDevice.status = 'unknown';
-                addLog('<strong>MuMuPlayer</strong> not reachable from browser (expected — use ADB directly)', 'warn');
+                addLog('WebRTC detection failed', 'warn');
             }
 
             // Network info
             if (navigator.connection) {
-                const conn = navigator.connection;
-                addLog(`Network: <strong>${conn.effectiveType || 'unknown'}</strong> — downlink ${conn.downlink || '?'} Mbps`, 'info');
+                var conn = navigator.connection;
+                thisDevice.connection = conn.effectiveType || 'unknown';
+                thisDevice.downlink = (conn.downlink || '?') + ' Mbps';
+                addLog('Network: <strong>' + thisDevice.connection + '</strong> — ' + thisDevice.downlink, 'info');
+            }
+
+            // Geolocation
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(pos) {
+                    thisDevice.lat = pos.coords.latitude.toFixed(4);
+                    thisDevice.lon = pos.coords.longitude.toFixed(4);
+                    addLog('Location acquired: <strong>' + thisDevice.lat + ', ' + thisDevice.lon + '</strong>', 'success');
+                    if (selectedDeviceId === 'this') renderDeviceDetail(thisDevice);
+                }, function() {
+                    addLog('Location access denied or unavailable', 'warn');
+                }, { timeout: 5000 });
+            }
+
+            // MuMuPlayer emulator
+            var emuDevice = {
+                id: 'mumu',
+                name: 'MuMuPlayer',
+                type: 'emulator',
+                typeLabel: 'Android Emulator',
+                icon: getDeviceTypeIcon('emulator'),
+                ip: '127.0.0.1:5555',
+                status: 'unknown',
+                browser: 'Android WebView',
+                os: 'Android',
+                platform: 'Linux (emulated)',
+                cores: '?',
+                memory: '?',
+                connection: 'localhost',
+                downlink: '?',
+                language: '?',
+                cookies: '?',
+                online: '?',
+                lastSeen: null,
+                lat: null,
+                lon: null
+            };
+            devices.set('mumu', emuDevice);
+            addLog('Checking <strong>MuMuPlayer</strong> (ADB 5555)...', 'info');
+
+            try {
+                var controller = new AbortController();
+                setTimeout(function() { controller.abort(); }, 1500);
+                await fetch('http://127.0.0.1:5037/server', { signal: controller.signal, mode: 'no-cors' });
+                emuDevice.status = 'online';
+                emuDevice.lastSeen = new Date();
+                addLog('<strong>MuMuPlayer</strong> responded — online', 'success');
+            } catch (e) {
+                addLog('<strong>MuMuPlayer</strong> not reachable from browser', 'warn');
             }
 
             // Platform info
-            addLog(`Platform: <strong>${navigator.platform}</strong> — ${navigator.hardwareConcurrency || '?'} cores`, 'info');
+            addLog('Platform: <strong>' + thisDevice.platform + '</strong> — ' + thisDevice.cores + ' cores', 'info');
 
-            const elapsed = ((Date.now() - scanStart) / 1000).toFixed(1);
-            addLog(`Scan complete in <strong>${elapsed}s</strong> — ${devices.size} device(s) found`, 'success');
+            var elapsed = ((Date.now() - scanStart) / 1000).toFixed(1);
+            addLog('Scan complete in <strong>' + elapsed + 's</strong> — ' + devices.size + ' device(s)', 'success');
 
             document.getElementById('lastUpdated').textContent = 'Last scan: ' + new Date().toLocaleTimeString();
 
             renderDevices();
+            updateDropdown();
             btn.disabled = false;
             indicator.style.display = 'none';
         }
 
-        function getBrowserInfo() {
-            const ua = navigator.userAgent;
-            if (ua.includes('Firefox')) return 'Firefox';
-            if (ua.includes('Edg')) return 'Edge';
-            if (ua.includes('Chrome')) return 'Chrome';
-            if (ua.includes('Safari')) return 'Safari';
-            if (ua.includes('Brave')) return 'Brave';
-            return 'Unknown Browser';
-        }
-
         function renderDevices() {
-            const list = document.getElementById('deviceList');
-            const allDevices = Array.from(devices.values());
+            var list = document.getElementById('deviceList');
+            var allDevices = Array.from(devices.values());
 
-            const total = allDevices.length;
-            const online = allDevices.filter(d => d.status === 'online').length;
-            const offline = allDevices.filter(d => d.status === 'offline').length;
-            const unknown = allDevices.filter(d => d.status === 'unknown').length;
+            var total = allDevices.length;
+            var online = allDevices.filter(function(d) { return d.status === 'online'; }).length;
+            var offline = allDevices.filter(function(d) { return d.status === 'offline'; }).length;
+            var unknown = allDevices.filter(function(d) { return d.status === 'unknown'; }).length;
 
             document.getElementById('totalDevices').textContent = total;
             document.getElementById('onlineCount').textContent = online;
@@ -325,21 +465,96 @@
                 return;
             }
 
-            list.innerHTML = allDevices.map(d => `
-                <div class="device-card">
-                    <div class="device-info">
-                        <h3><span class="device-type-icon">${d.icon}</span>${d.name}</h3>
-                        <p>${d.typeLabel} — ${d.ip} — ${d.details}</p>
-                    </div>
-                    <div class="device-meta">
-                        <span class="device-status ${d.status}">${d.status}</span>
-                    </div>
-                </div>
-            `).join('');
+            list.innerHTML = allDevices.map(function(d) {
+                var selected = d.id === selectedDeviceId ? ' selected' : '';
+                return '<div class="device-card' + selected + '" onclick="selectDevice(\'' + d.id + '\')">'
+                    + '<div class="device-info">'
+                    + '<h3>' + d.icon + ' ' + d.name + '</h3>'
+                    + '<p>' + d.typeLabel + ' \u2014 ' + d.ip + ' \u2014 ' + d.status + '</p>'
+                    + '</div>'
+                    + '<span class="device-status ' + d.status + '">' + d.status + '</span>'
+                    + '</div>';
+            }).join('');
+        }
+
+        function updateDropdown() {
+            var select = document.getElementById('deviceSelect');
+            var currentValue = select.value;
+            var html = '<option value="">-- Select a device --</option>';
+            devices.forEach(function(d) {
+                html += '<option value="' + d.id + '"' + (d.id === currentValue ? ' selected' : '') + '>'
+                    + d.icon + ' ' + d.name + ' (' + d.status + ')</option>';
+            });
+            select.innerHTML = html;
+        }
+
+        function selectDevice(id) {
+            if (!id) {
+                selectedDeviceId = null;
+                document.getElementById('detailPanel').style.display = 'none';
+                renderDevices();
+                document.getElementById('mapOverlay').textContent = 'Select a device to show its location';
+                document.getElementById('mapFrame').src = 'https://www.openstreetmap.org/export/embed.html?bbox=-180%2C-85%2C180%2C85&layer=mapnik';
+                return;
+            }
+            selectedDeviceId = id;
+            var device = devices.get(id);
+            if (!device) return;
+
+            renderDevices();
+            updateDropdown();
+            renderDeviceDetail(device);
+            updateMap(device);
+        }
+
+        function renderDeviceDetail(d) {
+            var panel = document.getElementById('detailPanel');
+            panel.style.display = 'block';
+
+            var seenStr = d.lastSeen ? d.lastSeen.toLocaleTimeString() : 'Never';
+
+            document.getElementById('detailContent').innerHTML =
+                '<div class="detail-header">'
+                + '<span class="detail-icon">' + d.icon + '</span>'
+                + '<h3>' + d.name + '</h3>'
+                + '<span class="device-status ' + d.status + '">' + d.status + '</span>'
+                + '</div>'
+                + '<div class="detail-grid">'
+                + '<div class="detail-row"><div class="d-label">IP Address</div><div class="d-value">' + d.ip + '</div></div>'
+                + '<div class="detail-row"><div class="d-label">Type</div><div class="d-value">' + d.typeLabel + '</div></div>'
+                + '<div class="detail-row"><div class="d-label">Browser</div><div class="d-value">' + d.browser + '</div></div>'
+                + '<div class="detail-row"><div class="d-label">OS</div><div class="d-value">' + d.os + '</div></div>'
+                + '<div class="detail-row"><div class="d-label">Platform</div><div class="d-value">' + d.platform + '</div></div>'
+                + '<div class="detail-row"><div class="d-label">CPU Cores</div><div class="d-value">' + d.cores + '</div></div>'
+                + '<div class="detail-row"><div class="d-label">Memory</div><div class="d-value">' + d.memory + '</div></div>'
+                + '<div class="detail-row"><div class="d-label">Connection</div><div class="d-value">' + d.connection + '</div></div>'
+                + '<div class="detail-row"><div class="d-label">Downlink</div><div class="d-value">' + d.downlink + '</div></div>'
+                + '<div class="detail-row"><div class="d-label">Language</div><div class="d-value">' + d.language + '</div></div>'
+                + '<div class="detail-row"><div class="d-label">Cookies</div><div class="d-value">' + d.cookies + '</div></div>'
+                + '<div class="detail-row"><div class="d-label">Network</div><div class="d-value">' + d.online + '</div></div>'
+                + '<div class="detail-row"><div class="d-label">Last Seen</div><div class="d-value">' + seenStr + '</div></div>'
+                + '<div class="detail-row"><div class="d-label">Location</div><div class="d-value">' + (d.lat && d.lon ? d.lat + ', ' + d.lon : 'Unknown') + '</div></div>'
+                + '</div>';
+        }
+
+        function updateMap(d) {
+            var overlay = document.getElementById('mapOverlay');
+            var frame = document.getElementById('mapFrame');
+
+            if (d.lat && d.lon) {
+                var lat = parseFloat(d.lat);
+                var lon = parseFloat(d.lon);
+                var bbox = (lon - 0.05).toFixed(4) + ',' + (lat - 0.05).toFixed(4) + ',' + (lon + 0.05).toFixed(4) + ',' + (lat + 0.05).toFixed(4);
+                frame.src = 'https://www.openstreetmap.org/export/embed.html?bbox=' + bbox + '&layer=mapnik&marker=' + lat + ',' + lon;
+                overlay.innerHTML = '<strong>' + d.name + '</strong> \u2014 ' + d.lat + ', ' + d.lon;
+            } else {
+                frame.src = 'https://www.openstreetmap.org/export/embed.html?bbox=-180%2C-85%2C180%2C85&layer=mapnik';
+                overlay.innerHTML = '<strong>' + d.name + '</strong> \u2014 Location unknown';
+            }
         }
 
         // Auto-scan on load
-        window.addEventListener('load', () => {
+        window.addEventListener('load', function() {
             addLog('Device Tracker initialized', 'info');
             scanDevices();
         });
