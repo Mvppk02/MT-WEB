@@ -6,68 +6,105 @@
 <title>Maze</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#0a0a0a;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:system-ui,-apple-system,sans-serif;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none}
-canvas{display:block;border:1px solid #1a1a1a;border-radius:4px}
-#hud{color:#555;font-size:11px;margin-top:8px;display:flex;gap:20px;align-items:center;font-family:monospace;flex-wrap:wrap;justify-content:center}
-#hud .val{color:#ccc}
-#debug{position:fixed;top:8px;left:8px;color:#333;font-size:10px;font-family:monospace;z-index:5;line-height:1.5}
-#debug.sensor{color:#22c55e}
-#msg{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.88);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;z-index:10;gap:14px}
-#msg h2{font-size:26px;font-weight:300;letter-spacing:2px}
-#msg p{color:#666;font-size:13px;font-family:monospace;text-align:center;max-width:320px;line-height:1.6}
-#msg button{background:#1a1a1a;border:1px solid #333;color:#ccc;padding:10px 28px;border-radius:4px;cursor:pointer;font-size:14px;letter-spacing:1px}
-#msg button:hover{background:#252525;border-color:#555;color:#fff}
-#iosBtn{position:fixed;top:8px;right:8px;z-index:6}
-#iosBtn button{background:#1a1a1a;border:1px solid #333;color:#888;padding:5px 12px;border-radius:4px;cursor:pointer;font-size:10px;font-family:monospace}
-#iosBtn button:hover{border-color:#555;color:#ccc}
+body{background:#0a0a0a;color:#ccc;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:system-ui,-apple-system,sans-serif;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none}
+canvas{display:block}
+#info{position:fixed;top:6px;left:6px;right:6px;display:flex;justify-content:space-between;align-items:flex-start;font-size:10px;font-family:monospace;z-index:5;pointer-events:none}
+#debug{color:#444;line-height:1.4}
+#debug.active{color:#22c55e}
+#status{color:#555}
+#hud{display:flex;gap:16px;margin-top:6px;font-size:11px;font-family:monospace;color:#555}
+#hud .v{color:#bbb}
+.overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.90);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;z-index:10;gap:12px}
+.overlay h2{font-size:24px;font-weight:300;letter-spacing:3px}
+.overlay p{color:#555;font-size:12px;font-family:monospace;text-align:center;max-width:300px;line-height:1.7}
+.overlay button{background:#111;border:1px solid #333;color:#aaa;padding:10px 30px;border-radius:4px;cursor:pointer;font-size:13px;letter-spacing:2px}
+.overlay button:hover{background:#1a1a1a;border-color:#555;color:#ddd}
+.overlay .hint{color:#333;font-size:11px;margin-top:4px}
+#ctrls{position:fixed;bottom:8px;left:0;right:0;display:flex;justify-content:center;gap:8px;z-index:5}
+.ctrl-btn{background:#111;border:1px solid #222;color:#555;padding:4px 10px;border-radius:3px;font-size:10px;font-family:monospace;cursor:pointer}
+.ctrl-btn:hover{border-color:#444;color:#888}
+.ctrl-btn.on{border-color:#22c55e;color:#22c55e}
 </style>
 </head>
 <body>
-<div id="debug">waiting for sensor...</div>
-<div id="iosBtn"><button id="btnIOS" onclick="requestIOSSensor()">Enable Motion</button></div>
+<div id="info"><div id="debug">init...</div><div id="status"></div></div>
 <canvas id="c"></canvas>
 <div id="hud">
-  <div>AXIS <span class="val" id="tilt">0.00 , 0.00</span></div>
-  <div>TIME <span class="val" id="time">0.0s</span></div>
-  <div>BEST <span class="val" id="best">--</span></div>
+  <span>AXIS <span class="v" id="ax">0.00, 0.00</span></span>
+  <span>TIME <span class="v" id="tm">0.0s</span></span>
+  <span>BEST <span class="v" id="bs">--</span></span>
 </div>
-<div id="msg">
-  <h2 id="msgTitle">MAZE</h2>
-  <p id="msgSub">Tilt your device to roll the red dot to the green goal.<br>On desktop: click &amp; drag on the maze.</p>
-  <button id="msgBtn" onclick="startGame()">START</button>
+<div id="ctrls">
+  <button class="ctrl-btn" id="btnMode" onclick="cycleMode()">MODE: SENSOR</button>
+  <button class="ctrl-btn" id="btnCal" onclick="doCalibrate()">RECALIBRATE</button>
+</div>
+<div id="startOverlay" class="overlay">
+  <h2>MAZE</h2>
+  <p>Tilt device to roll red dot to green goal.<br>Desktop: click &amp; drag, or arrow keys.</p>
+  <button onclick="startGame()">START</button>
+  <div class="hint">Hold phone at comfortable angle when starting</div>
+</div>
+<div id="winOverlay" class="overlay" style="display:none">
+  <h2 id="winTitle">COMPLETE</h2>
+  <p id="winText"></p>
+  <button onclick="doRestart()">RESTART</button>
 </div>
 <script>
 var CV=document.getElementById('c');
 var ctx=CV.getContext('2d');
-var $=function(id){return document.getElementById(id);};
 
-// ============ MAZE ============
+// --- CONSTANTS ---
 var COLS=21,ROWS=21;
+var ACC=0.02;
+var FRICTION=0.87;
+var MAX_SPD=0.16;
+var RAD=0.28;
+
+// --- STATE ---
 var maze,cellSize;
-var px,py,pvx,pvy;
-var goalX,goalY;
-var state='idle';
-var startTime,elapsed=0;
-var bestTime=localStorage.getItem('mazeBest')||null;
+var px,py,pvx,pvy,goalX,goalY;
+var playing=false;
+var startTime=0,elapsed=0;
+var bestTime=localStorage.getItem('mazeBest');
 var trail=[];
-var raf;
 
-if(bestTime) $('best').textContent=parseFloat(bestTime).toFixed(1)+'s';
+// --- INPUT STATE ---
+// mode: 0=auto(detect), 1=sensor only, 2=touch/mouse only, 3=keyboard only
+var inputMode=0;
 
+// Sensor data
+var haveOrient=false, haveMotion=false;
+var orientBeta=0, orientGamma=0;   // raw degrees
+var motionAX=0, motionAY=0, motionAZ=0;
+
+// Computed gravity
+var gx=0, gy=0;
+
+// Calibration
+var calBeta=0, calGamma=0, calibrated=false;
+
+// Pointer
+var pointerDown=false;
+
+if(bestTime)document.getElementById('bs').textContent=parseFloat(bestTime).toFixed(1)+'s';
+
+function $(id){return document.getElementById(id);}
+function log(msg){$('debug').textContent=msg;}
+
+function setActive(ok){$('debug').className=ok?'active':'';}
+
+// ============ MAZE GENERATION ============
 function buildMaze(){
   var g=[];
   for(var r=0;r<ROWS;r++){g[r]=[];for(var c=0;c<COLS;c++)g[r][c]=0;}
   function carve(r,c){
     g[r][c]=1;
     var d=[[0,-2],[0,2],[-2,0],[2,0]];
-    for(var i=d.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var tmp=d[i];d[i]=d[j];d[j]=tmp;}
-    for(var k=0;k<d.length;k++){
+    for(var i=d.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=d[i];d[i]=d[j];d[j]=t;}
+    for(var k=0;k<4;k++){
       var dr=d[k][0],dc=d[k][1];
       var nr=r+dr,nc=c+dc;
-      if(nr>0&&nr<ROWS-1&&nc>0&&nc<COLS-1&&g[nr][nc]===0){
-        g[r+dr/2][c+dc/2]=1;
-        carve(nr,nc);
-      }
+      if(nr>0&&nr<ROWS-1&&nc>0&&nc<COLS-1&&g[nr][nc]===0){g[r+dr/2][c+dc/2]=1;carve(nr,nc);}
     }
   }
   carve(1,1);
@@ -75,161 +112,181 @@ function buildMaze(){
   var dist={},q=[[1,1]];dist['1,1']=0;
   var maxD=0,gr=ROWS-2,gc=COLS-2;
   while(q.length){
-    var rc=q.shift();var r=rc[0],c=rc[1];
+    var rc=q.shift(),r=rc[0],c=rc[1];
     var dirs=[[0,1],[0,-1],[1,0],[-1,0]];
-    for(var k=0;k<dirs.length;k++){
+    for(var k=0;k<4;k++){
       var nr=r+dirs[k][0],nc=c+dirs[k][1];
       if(nr>=0&&nr<ROWS&&nc>=0&&nc<COLS&&g[nr][nc]!==0&&!(nr+','+nc in dist)){
-        dist[nr+','+nc]=dist[r+','+c]+1;
-        q.push([nr,nc]);
+        dist[nr+','+nc]=dist[r+','+c]+1;q.push([nr,nc]);
         if(dist[nr+','+nc]>maxD&&(nr>3||nc>3)){maxD=dist[nr+','+nc];gr=nr;gc=nc;}
       }
     }
   }
   g[gr][gc]=3;
-  return {grid:g,goalR:gr,goalC:gc};
+  return {grid:g,gR:gr,gC:gc};
 }
 
 function resize(){
-  var maxW=Math.min(window.innerWidth-16,500);
-  var maxH=Math.min(window.innerHeight-120,500);
-  cellSize=Math.floor(Math.min(maxW/COLS,maxH/ROWS));
-  CV.width=cellSize*COLS;
-  CV.height=cellSize*ROWS;
+  var mw=Math.min(window.innerWidth-12,500);
+  var mh=Math.min(window.innerHeight-100,500);
+  cellSize=Math.floor(Math.min(mw/COLS,mh/ROWS));
+  CV.width=cellSize*COLS;CV.height=cellSize*ROWS;
 }
 
 // ============ SENSORS ============
-// We use BOTH DeviceOrientation AND DeviceMotion for maximum compatibility.
-// The key insight: on many devices, beta/gamma are NULL (not 0) when no data.
-// We must check for null explicitly.
 
-var gx=0, gy=0;           // final gravity vector -1..1
-var sensorActive=false;
-var sensorType='none';     // 'orientation', 'motion', 'mouse', 'touch'
-var calBeta=0, calGamma=0;
-var calibrated=false;
-var rawBeta=0, rawGamma=0, rawAlpha=0;
-var rawAX=0, rawAY=0;
-
-function updateDebug(){
-  var d=$('debug');
-  if(sensorType==='none'){
-    d.textContent='No sensor. Use mouse/touch.';
-    d.className='';
-  }else{
-    d.textContent=sensorType+' | b:'+rawBeta.toFixed(1)+' g:'+rawGamma.toFixed(1)+' | out:'+gx.toFixed(2)+','+gy.toFixed(2);
-    d.className='sensor';
-  }
-}
-
-// --- DeviceOrientation: gives beta/gamma directly ---
+// 1) DeviceOrientation — primary, works on Android + iOS (with permission)
 window.addEventListener('deviceorientation', function(e){
-  // CRITICAL: beta and gamma can be NULL on some devices
+  // Both null = no real sensor or permission denied
   if(e.beta===null && e.gamma===null) return;
-  sensorActive=true;
-  sensorType='orientation';
-  $('btnIOS').style.display='none';
-  rawBeta  = e.beta  || 0;
-  rawGamma = e.gamma || 0;
-  rawAlpha = e.alpha || 0;
-  updateDebug();
+  if(e.beta===undefined && e.gamma===undefined) return;
+  haveOrient=true;
+  orientBeta=e.beta||0;
+  orientGamma=e.gamma||0;
+  setActive(true);
+  log('orient b:'+orientBeta.toFixed(1)+' g:'+orientGamma.toFixed(1));
 });
 
-// --- DeviceMotion: gives acceleration including gravity ---
-// This works on MORE devices than deviceorientation
+// 2) DeviceMotion — fallback, gives acceleration including gravity
 window.addEventListener('devicemotion', function(e){
-  if(!e.accelerationIncludingGravity) return;
-  // Don't let motion events override mouse/touch input
-  if(sensorType==='mouse'||sensorType==='touch') return;
-  // If we already have orientation, prefer it (more stable)
-  if(sensorType==='orientation') return;
-  var ax=e.accelerationIncludingGravity.x||0;
-  var ay=e.accelerationIncludingGravity.y||0;
-  var az=e.accelerationIncludingGravity.z||0;
-  // Ignore near-zero values (desktop without real accelerometer)
-  var mag=Math.sqrt(ax*ax+ay*ay+az*az);
-  if(mag<1) return; // no real motion data
-  sensorActive=true;
-  sensorType='motion';
-  $('btnIOS').style.display='none';
-  rawBeta  = Math.atan2(ay, Math.sqrt(ax*ax+az*az)) * 180/Math.PI;
-  rawGamma = Math.atan2(-ax, Math.sqrt(ay*ay+az*az)) * 180/Math.PI;
-  rawAX=ax; rawAY=ay;
-  updateDebug();
+  var a=e.accelerationIncludingGravity;
+  if(!a) return;
+  var ax=a.x||0, ay=a.y||0, az=a.z||0;
+  // Filter out near-zero (desktop without accelerometer)
+  if(Math.abs(ax)<0.1&&Math.abs(ay)<0.1&&Math.abs(az)<0.5) return;
+  haveMotion=true;
+  motionAX=ax; motionAY=ay; motionAZ=az;
+  setActive(true);
+  if(!haveOrient){
+    // Derive tilt from acceleration
+    var pitch=Math.atan2(ay,Math.sqrt(ax*ax+az*az))*180/Math.PI;
+    var roll=Math.atan2(-ax,Math.sqrt(ay*ay+az*az))*180/Math.PI;
+    orientBeta=pitch;
+    orientGamma=roll;
+    log('motion p:'+pitch.toFixed(1)+' r:'+roll.toFixed(1));
+  }
 });
 
-// --- iOS 13+ permission ---
+// iOS 13+ permissions
 function requestIOSSensor(){
-  // Try DeviceOrientation first
   if(typeof DeviceOrientationEvent==='function' && typeof DeviceOrientationEvent.requestPermission==='function'){
     DeviceOrientationEvent.requestPermission().then(function(r){
       if(r==='granted'){
-        window.addEventListener('deviceorientation', function(e){
-          if(e.beta===null && e.gamma===null) return;
-          sensorActive=true; sensorType='orientation';
-          $('btnIOS').style.display='none';
-          rawBeta=e.beta||0; rawGamma=e.gamma||0; rawAlpha=e.alpha||0;
-          updateDebug();
+        window.addEventListener('deviceorientation',function(e){
+          if(e.beta===null&&e.gamma===null)return;
+          haveOrient=true;orientBeta=e.beta||0;orientGamma=e.gamma||0;setActive(true);
+          log('orientios b:'+orientBeta.toFixed(1)+' g:'+orientGamma.toFixed(1));
         });
       }
     }).catch(function(){});
   }
-  // Also try DeviceMotion
   if(typeof DeviceMotionEvent==='function' && typeof DeviceMotionEvent.requestPermission==='function'){
     DeviceMotionEvent.requestPermission().then(function(r){
       if(r==='granted'){
-        window.addEventListener('devicemotion', function(e){
-          if(!e.accelerationIncludingGravity) return;
-          if(sensorType==='orientation') return;
-          var ax=e.accelerationIncludingGravity.x||0;
-          var ay=e.accelerationIncludingGravity.y||0;
-          var az=e.accelerationIncludingGravity.z||0;
-          sensorActive=true; sensorType='motion';
-          $('btnIOS').style.display='none';
-          rawBeta=Math.atan2(ay,Math.sqrt(ax*ax+az*az))*180/Math.PI;
-          rawGamma=Math.atan2(-ax,Math.sqrt(ay*ay+az*az))*180/Math.PI;
-          rawAX=ax; rawAY=ay;
-          updateDebug();
+        window.addEventListener('devicemotion',function(e){
+          var a=e.accelerationIncludingGradient;if(!a)return;
+          var ax=a.x||0,ay=a.y||0,az=a.z||0;
+          if(Math.abs(ax)<0.1&&Math.abs(ay)<0.1&&Math.abs(az)<0.5)return;
+          haveMotion=true;setActive(true);
+          if(!haveOrient){
+            orientBeta=Math.atan2(ay,Math.sqrt(ax*ax+az*az))*180/Math.PI;
+            orientGamma=Math.atan2(-ax,Math.sqrt(ay*ay+az*az))*180/Math.PI;
+            log('motionios');
+          }
         });
       }
     }).catch(function(){});
   }
 }
 
-// Auto-detect if we need the iOS button
-if((typeof DeviceOrientationEvent==='function' && typeof DeviceOrientationEvent.requestPermission==='function') ||
-   (typeof DeviceMotionEvent==='function' && typeof DeviceMotionEvent.requestPermission==='function')){
-  // iOS 13+ — show button
-} else {
-  $('btnIOS').style.display='none';
+(function(){
+  var needIOS=(typeof DeviceOrientationEvent==='function' && typeof DeviceOrientationEvent.requestPermission==='function') ||
+              (typeof DeviceMotionEvent==='function' && typeof DeviceMotionEvent.requestPermission==='function');
+  if(!needIOS) requestIOSSensor(); // auto-request on non-iOS
+})();
+
+// ============ INPUT METHODS ============
+function cycleMode(){
+  inputMode=(inputMode+1)%4;
+  var labels=['MODE: AUTO','MODE: SENSOR','MODE: TOUCH','MODE: KEYS'];
+  $('btnMode').textContent=labels[inputMode];
+  if(inputMode===1&&!haveOrient&&!haveMotion) log('No sensor detected!');
+  if(inputMode===3) log('Arrow keys to move');
 }
+
+function doCalibrate(){
+  calBeta=orientBeta;
+  calGamma=orientGamma;
+  calibrated=true;
+  log('Calibrated at b:'+calBeta.toFixed(1)+' g:'+calGamma.toFixed(1));
+}
+
+// Mouse on canvas
+CV.addEventListener('mousedown',function(){
+  pointerDown=true;
+  if(inputMode===0&&playing) inputMode=2;
+});
+CV.addEventListener('mouseup',function(){pointerDown=false;gx=0;gy=0;});
+CV.addEventListener('mouseleave',function(){pointerDown=false;gx=0;gy=0;});
+CV.addEventListener('mousemove',function(e){
+  if(!pointerDown||!playing)return;
+  var r=CV.getBoundingClientRect();
+  gx=Math.max(-1,Math.min(1,((e.clientX-r.left)/cellSize-px)*1.5));
+  gy=Math.max(-1,Math.min(1,((e.clientY-r.top)/cellSize-py)*1.5));
+});
+
+// Touch on canvas
+CV.addEventListener('touchstart',function(e){
+  e.preventDefault();pointerDown=true;
+  if(inputMode===0&&playing) inputMode=2;
+},{passive:false});
+CV.addEventListener('touchend',function(e){e.preventDefault();pointerDown=false;gx=0;gy=0;},{passive:false});
+CV.addEventListener('touchmove',function(e){
+  e.preventDefault();if(!playing)return;
+  var r=CV.getBoundingClientRect(),t=e.touches[0];
+  gx=Math.max(-1,Math.min(1,((t.clientX-r.left)/cellSize-px)*1.5));
+  gy=Math.max(-1,Math.min(1,((t.clientY-r.top)/cellSize-py)*1.5));
+},{passive:false});
+
+// Keyboard
+var keys={};
+window.addEventListener('keydown',function(e){keys[e.key]=true;});
+window.addEventListener('keyup',function(e){keys[e.key]=false;});
 
 // ============ GAME ============
 function initGame(){
   resize();
   var r=buildMaze();
-  maze=r.grid;goalX=r.goalC;goalY=r.goalR;
-  px=1.5;py=1.5;pvx=0;pvy=0;
-  trail=[];
-  // Calibrate: current tilt = neutral
-  calBeta=rawBeta; calGamma=rawGamma;
-  calibrated=true;
+  maze=r.grid;goalX=r.gC;goalY=r.gR;
+  px=1.5;py=1.5;pvx=0;pvy=0;trail=[];
+  calBeta=orientBeta;calGamma=orientGamma;calibrated=true;
   startTime=performance.now();elapsed=0;
-  state='playing';
+  playing=true;
+  log('Game started. Cal at b:'+calBeta.toFixed(1)+' g:'+calGamma.toFixed(1));
 }
 
 function startGame(){
-  $('msg').style.display='none';
+  $('startOverlay').style.display='none';
   initGame();
-  if(raf)cancelAnimationFrame(raf);
-  loop();
 }
 
-// ============ PHYSICS ============
-var ACC=0.018;
-var FRICTION=0.88;
-var MAX_SPD=0.15;
-var RAD=0.30;
+function doRestart(){
+  $('winOverlay').style.display='none';
+  initGame();
+}
+
+function win(){
+  playing=false;
+  elapsed=(performance.now()-startTime)/1000;
+  if(!bestTime||elapsed<parseFloat(bestTime)){
+    bestTime=elapsed.toFixed(2);
+    localStorage.setItem('mazeBest',bestTime);
+    $('bs').textContent=parseFloat(bestTime).toFixed(1)+'s';
+  }
+  $('winTitle').textContent='COMPLETE';
+  $('winText').textContent='Time: '+elapsed.toFixed(2)+'s'+(bestTime?' | Best: '+parseFloat(bestTime).toFixed(2)+'s':'');
+  $('winOverlay').style.display='flex';
+}
 
 function wall(r,c){
   if(r<0||r>=ROWS||c<0||c>=COLS)return true;
@@ -237,171 +294,83 @@ function wall(r,c){
 }
 
 function update(){
-  if(state!=='playing')return;
+  if(!playing)return;
 
-  // Compute gravity from whichever sensor is active
-  if(sensorActive && calibrated && sensorType!=='mouse' && sensorType!=='touch'){
-    var dGamma=rawGamma-calGamma;
-    var dBeta=rawBeta-calBeta;
-    gx=Math.max(-1,Math.min(1,dGamma/25));
-    gy=Math.max(-1,Math.min(1,dBeta/25));
+  // Determine input
+  var useSensor=(inputMode===0||inputMode===1)&&(haveOrient||haveMotion);
+  var useKeys=(inputMode===0||inputMode===3);
+
+  if(useSensor&&calibrated){
+    var dB=orientBeta-calBeta;
+    var dG=orientGamma-calGamma;
+    gx=Math.max(-1,Math.min(1,dG/25));
+    gy=Math.max(-1,Math.min(1,dB/25));
   }
-  // For mouse/touch, gx/gy are already set by the event handlers
-  // For no sensor, gx/gy remain at their last value (or 0)
 
-  pvx+=gx*ACC;
-  pvy+=gy*ACC;
-  pvx*=FRICTION;
-  pvy*=FRICTION;
+  if(useKeys){
+    var kx=0,ky=0;
+    if(keys['ArrowLeft']||keys['a'])kx=-1;
+    if(keys['ArrowRight']||keys['d'])kx=1;
+    if(keys['ArrowUp']||keys['w'])ky=-1;
+    if(keys['ArrowDown']||keys['s'])ky=1;
+    if(kx!==0||ky!==0){gx=kx;gy=ky;}
+  }
+
+  // If no input source, decay
+  if(!useSensor&&!pointerDown&&!keys['ArrowLeft']&&!keys['ArrowRight']&&!keys['ArrowUp']&&!keys['ArrowDown']&&!keys['a']&&!keys['d']&&!keys['w']&&!keys['s']){
+    // gx,gy from mouse/touch already handled
+    if(!pointerDown){/* keep last or let friction handle */}
+  }
+
+  // Physics
+  pvx+=gx*ACC;pvy+=gy*ACC;
+  pvx*=FRICTION;pvy*=FRICTION;
   pvx=Math.max(-MAX_SPD,Math.min(MAX_SPD,pvx));
   pvy=Math.max(-MAX_SPD,Math.min(MAX_SPD,pvy));
 
-  var nx=px+pvx, ny=py+pvy;
-  if(!wall(py-RAD,nx+RAD)&&!wall(py+RAD,nx+RAD)&&!wall(py-RAD,nx-RAD)&&!wall(py+RAD,nx-RAD)){
-    px=nx;
-  }else{
-    pvx=-pvx*0.2;
-    var mc=Math.round(nx);
-    if(wall(Math.round(py),mc))px=mc+(nx<mc?(1-RAD):RAD);
-  }
-  if(!wall(ny-RAD,px+RAD)&&!wall(ny+RAD,px+RAD)&&!wall(ny-RAD,px-RAD)&&!wall(ny+RAD,px+RAD)){
-    py=ny;
-  }else{
-    pvy=-pvy*0.2;
-    var mr=Math.round(ny);
-    if(wall(mr,Math.round(px)))py=mr+(ny<mr?(1-RAD):RAD);
-  }
+  var nx=px+pvx,ny=py+pvy;
+  if(!wall(py-RAD,nx+RAD)&&!wall(py+RAD,nx+RAD)&&!wall(py-RAD,nx-RAD)&&!wall(py+RAD,nx-RAD)){px=nx;}
+  else{pvx*=-0.2;var mc=Math.round(nx);if(wall(Math.round(py),mc))px=mc+(nx<mc?(1-RAD):RAD);}
+  if(!wall(ny-RAD,px+RAD)&&!wall(ny+RAD,px+RAD)&&!wall(ny-RAD,px-RAD)&&!wall(ny+RAD,px+RAD)){py=ny;}
+  else{pvy*=-0.2;var mr=Math.round(ny);if(wall(mr,Math.round(px)))py=mr+(ny<mr?(1-RAD):RAD);}
   px=Math.max(RAD,Math.min(COLS-1-RAD,px));
   py=Math.max(RAD,Math.min(ROWS-1-RAD,py));
 
-  if(Math.abs(pvx)>0.003||Math.abs(pvy)>0.003){
-    trail.push({x:px,y:py});
-    if(trail.length>150)trail.shift();
-  }
+  if(Math.abs(pvx)>0.003||Math.abs(pvy)>0.003){trail.push({x:px,y:py});if(trail.length>120)trail.shift();}
 
-  if(Math.hypot(px-goalX-0.5,py-goalY-0.5)<0.5){
-    state='won';
-    elapsed=(performance.now()-startTime)/1000;
-    if(!bestTime||elapsed<parseFloat(bestTime)){
-      bestTime=elapsed.toFixed(2);
-      localStorage.setItem('mazeBest',bestTime);
-      $('best').textContent=parseFloat(bestTime).toFixed(1)+'s';
-    }
-    $('msgTitle').textContent='COMPLETE';
-    $('msgSub').textContent='Time: '+elapsed.toFixed(2)+'s'+(bestTime?' | Best: '+parseFloat(bestTime).toFixed(2)+'s':'');
-    $('msgBtn').textContent='RESTART';
-    $('msg').style.display='flex';
-  }
+  if(Math.hypot(px-goalX-0.5,py-goalY-0.5)<0.5) win();
 
-  $('tilt').textContent=gx.toFixed(2)+' , '+gy.toFixed(2);
+  $('ax').textContent=gx.toFixed(2)+', '+gy.toFixed(2);
   elapsed=(performance.now()-startTime)/1000;
-  $('time').textContent=elapsed.toFixed(1)+'s';
-  updateDebug();
+  $('tm').textContent=elapsed.toFixed(1)+'s';
 }
 
 function draw(){
-  ctx.fillStyle='#0a0a0a';
-  ctx.fillRect(0,0,CV.width,CV.height);
-  for(var r=0;r<ROWS;r++){
-    for(var c=0;c<COLS;c++){
-      if(maze[r][c]===0){
-        ctx.fillStyle='#1a1a1a';
-        ctx.fillRect(c*cellSize,r*cellSize,cellSize,cellSize);
-        ctx.fillStyle='#222';
-        ctx.fillRect(c*cellSize+1,r*cellSize+1,cellSize-2,1);
-        ctx.fillRect(c*cellSize+1,r*cellSize+1,1,cellSize-2);
-        ctx.fillStyle='#111';
-        ctx.fillRect(c*cellSize+1,r*cellSize+cellSize-2,cellSize-2,1);
-        ctx.fillRect(c*cellSize+cellSize-2,r*cellSize+1,1,cellSize-2);
-      }
+  ctx.fillStyle='#0a0a0a';ctx.fillRect(0,0,CV.width,CV.height);
+  for(var r=0;r<ROWS;r++)for(var c=0;c<COLS;c++){
+    if(maze[r][c]===0){
+      ctx.fillStyle='#1a1a1a';ctx.fillRect(c*cellSize,r*cellSize,cellSize,cellSize);
+      ctx.fillStyle='#222';ctx.fillRect(c*cellSize+1,r*cellSize+1,cellSize-2,1);ctx.fillRect(c*cellSize+1,r*cellSize+1,1,cellSize-2);
+      ctx.fillStyle='#0c0c0c';ctx.fillRect(c*cellSize+1,r*cellSize+cellSize-2,cellSize-2,1);ctx.fillRect(c*cellSize+cellSize-2,r*cellSize+1,1,cellSize-2);
     }
   }
-  var t=performance.now()/1000;
-  var pulse=0.7+0.3*Math.sin(t*3);
-  ctx.beginPath();
-  ctx.arc((goalX+0.5)*cellSize,(goalY+0.5)*cellSize,cellSize*0.4*pulse,0,Math.PI*2);
-  ctx.fillStyle='#22c55e';ctx.fill();
-  ctx.beginPath();
-  ctx.arc((goalX+0.5)*cellSize,(goalY+0.5)*cellSize,cellSize*0.18,0,Math.PI*2);
-  ctx.fillStyle='#4ade80';ctx.fill();
-  for(var i=0;i<trail.length;i++){
-    var a=i/trail.length;
-    ctx.beginPath();
-    ctx.arc(trail[i].x*cellSize,trail[i].y*cellSize,cellSize*0.06*a,0,Math.PI*2);
-    ctx.fillStyle='rgba(239,68,68,'+(a*0.4)+')';
-    ctx.fill();
-  }
+  var tt=performance.now()/1000,p=0.7+0.3*Math.sin(tt*3);
+  ctx.beginPath();ctx.arc((goalX+0.5)*cellSize,(goalY+0.5)*cellSize,cellSize*0.4*p,0,Math.PI*2);ctx.fillStyle='#22c55e';ctx.fill();
+  ctx.beginPath();ctx.arc((goalX+0.5)*cellSize,(goalY+0.5)*cellSize,cellSize*0.18,0,Math.PI*2);ctx.fillStyle='#4ade80';ctx.fill();
+  for(var i=0;i<trail.length;i++){var a=i/trail.length;ctx.beginPath();ctx.arc(trail[i].x*cellSize,trail[i].y*cellSize,cellSize*0.05*a,0,Math.PI*2);ctx.fillStyle='rgba(239,68,68,'+(a*0.35)+')';ctx.fill();}
   var bx=px*cellSize,by=py*cellSize,br=RAD*cellSize;
-  ctx.beginPath();
-  ctx.arc(bx,by,br*2.5,0,Math.PI*2);
-  var g2=ctx.createRadialGradient(bx,by,0,bx,by,br*2.5);
-  g2.addColorStop(0,'rgba(239,68,68,0.3)');
-  g2.addColorStop(1,'rgba(239,68,68,0)');
-  ctx.fillStyle=g2;ctx.fill();
-  ctx.beginPath();
-  ctx.arc(bx,by,br,0,Math.PI*2);
-  var bg=ctx.createRadialGradient(bx-br*0.3,by-br*0.3,0,bx,by,br);
-  bg.addColorStop(0,'#f87171');
-  bg.addColorStop(1,'#dc2626');
-  ctx.fillStyle=bg;ctx.fill();
+  ctx.beginPath();ctx.arc(bx,by,br*2.5,0,Math.PI*2);
+  var gg=ctx.createRadialGradient(bx,by,0,bx,by,br*2.5);gg.addColorStop(0,'rgba(239,68,68,0.25)');gg.addColorStop(1,'rgba(239,68,68,0)');ctx.fillStyle=gg;ctx.fill();
+  ctx.beginPath();ctx.arc(bx,by,br,0,Math.PI*2);
+  var bg=ctx.createRadialGradient(bx-br*0.3,by-br*0.3,0,bx,by,br);bg.addColorStop(0,'#f87171');bg.addColorStop(1,'#dc2626');ctx.fillStyle=bg;ctx.fill();
 }
 
-function loop(){
-  update();draw();
-  raf=requestAnimationFrame(loop);
-}
+function loop(){update();draw();requestAnimationFrame(loop);}
 
-// ============ MOUSE / TOUCH ============
-// These set gx/gy directly — works even without any sensor
-var pointerDown=false;
-
-CV.addEventListener('mousedown',function(){
-  pointerDown=true;
-  if(state==='playing') sensorType='mouse';
-});
-CV.addEventListener('mouseup',function(){
-  pointerDown=false;
-  gx=0;gy=0;
-});
-CV.addEventListener('mouseleave',function(){
-  pointerDown=false;
-  gx=0;gy=0;
-});
-CV.addEventListener('mousemove',function(e){
-  if(!pointerDown||state!=='playing')return;
-  var rect=CV.getBoundingClientRect();
-  var mx=(e.clientX-rect.left)/cellSize;
-  var my=(e.clientY-rect.top)/cellSize;
-  gx=Math.max(-1,Math.min(1,(mx-px)*1.2));
-  gy=Math.max(-1,Math.min(1,(my-py)*1.2));
-  sensorType='mouse';
-  updateDebug();
-});
-
-CV.addEventListener('touchstart',function(e){
-  e.preventDefault();pointerDown=true;
-  if(state==='playing') sensorType='touch';
-},{passive:false});
-CV.addEventListener('touchend',function(e){
-  e.preventDefault();pointerDown=false;gx=0;gy=0;
-},{passive:false});
-CV.addEventListener('touchmove',function(e){
-  e.preventDefault();
-  if(state!=='playing')return;
-  var rect=CV.getBoundingClientRect();
-  var t=e.touches[0];
-  var mx=(t.clientX-rect.left)/cellSize;
-  var my=(t.clientY-rect.top)/cellSize;
-  gx=Math.max(-1,Math.min(1,(mx-px)*1.2));
-  gy=Math.max(-1,Math.min(1,(my-py)*1.2));
-  sensorType='touch';
-  updateDebug();
-},{passive:false});
-
-// ============ INIT ============
+// Init
 resize();
 window.addEventListener('resize',function(){if(maze)resize();});
-updateDebug();
+loop();
 </script>
 </body>
 </html>
