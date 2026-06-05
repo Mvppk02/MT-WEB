@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Maze</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0a;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:system-ui,-apple-system,sans-serif;overflow:hidden;touch-action:none}
+canvas{display:block;border:1px solid #1a1a1a;border-radius:4px;max-width:100vw;max-height:78vh}
+#hud{color:#555;font-size:12px;margin-top:10px;display:flex;gap:24px;align-items:center;font-family:monospace}
+#hud span{color:#888}
+#hud .val{color:#ccc}
+#msg{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;z-index:10;gap:16px}
+#msg h2{font-size:28px;font-weight:300;letter-spacing:2px}
+#msg p{color:#666;font-size:14px;font-family:monospace}
+#msg button{background:#1a1a1a;border:1px solid #333;color:#ccc;padding:10px 28px;border-radius:4px;cursor:pointer;font-size:14px;letter-spacing:1px;transition:all .15s}
+#msg button:hover{background:#252525;border-color:#555;color:#fff}
+#permBtn{position:fixed;top:12px;right:12px;background:#111;border:1px solid #222;color:#555;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:11px;font-family:monospace;z-index:5}
+#permBtn:hover{border-color:#444;color:#888}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hud">
+  <div>TILT <span id="tilt" class="val">0, 0</span></div>
+  <div>TIME <span id="time" class="val">0.0s</span></div>
+  <div>BEST <span id="best" class="val">--</span></div>
+</div>
+<button id="permBtn" class="hidden" onclick="requestPerm()">Enable Motion</button>
+<div id="msg"><h2 id="msgTitle">MAZE</h2><p id="msgSub">Tilt your device to move the red dot to the green goal</p><button id="msgBtn" onclick="startGame()">START</button></div>
+<script>
+const canvas=document.getElementById('c');
+const ctx=canvas.getContext('2d');
+const elTilt=document.getElementById('tilt');
+const elTime=document.getElementById('time');
+const elBest=document.getElementById('best');
+const elMsg=document.getElementById('msg');
+const elMsgTitle=document.getElementById('msgTitle');
+const elMsgSub=document.getElementById('msgSub');
+const elMsgBtn=document.getElementById('msgBtn');
+const elPermBtn=document.getElementById('permBtn');
+
+const COLS=21, ROWS=21;
+let maze, cellSize;
+let px, py, pvx, pvy;
+let goalX, goalY;
+let gameState='idle';
+let startTime, elapsed=0;
+let bestTime=localStorage.getItem('mazeBest')||null;
+let gravityX=0, gravityY=0;
+let animId;
+let trail=[];
+
+if(bestTime) elBest.textContent=parseFloat(bestTime).toFixed(1)+'s';
+
+elPermBtn.classList.remove('hidden');
+
+function requestPerm(){
+  if(window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission==='function'){
+    DeviceOrientationEvent.requestPermission().then(r=>{
+      if(r==='granted'){
+        elPermBtn.classList.add('hidden');
+        window.addEventListener('deviceorientation', onOrient);
+      }
+    }).catch(()=>{});
+  }
+}
+
+function buildMaze(){
+  let g=[];
+  for(let r=0;r<ROWS;r++){g[r]=[];for(let c=0;c<COLS;c++)g[r][c]=0;}
+  function carve(r,c){
+    g[r][c]=1;
+    const dirs=[[0,-2],[0,2],[-2,0],[2,0]];
+    for(let i=dirs.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[dirs[i],dirs[j]]=[dirs[j],dirs[i]];}
+    for(const[dr,dc]of dirs){
+      const nr=r+dr, nc=c+dc;
+      if(nr>0&&nr<ROWS-1&&nc>0&&nc<COLS-1&&g[nr][nc]===0){
+        g[r+dr/2][c+dc/2]=1;
+        carve(nr,nc);
+      }
+    }
+  }
+  carve(1,1);
+  g[1][1]=2;
+  let maxD=0, gr=ROWS-2, gc=COLS-2;
+  let dist={};
+  let q=[[1,1]];
+  dist['1,1']=0;
+  while(q.length){
+    let[r,c]=q.shift();
+    for(const[dr,dc] of[[0,1],[0,-1],[1,0],[-1,0]]){
+      let nr=r+dr,nc=c+dc;
+      if(nr>=0&&nr<ROWS&&nc>=0&&nc<COLS&&g[nr][nc]!==0&&!dist.hasOwnProperty(nr+','+nc)){
+        dist[nr+','+nc]=dist[r+','+c]+1;
+        q.push([nr,nc]);
+        if(dist[nr+','+nc]>maxD && (nr>3||nc>3)){
+          maxD=dist[nr+','+nc];
+          gr=nr;gc=nc;
+        }
+      }
+    }
+  }
+  g[gr][gc]=3;
+  return {grid:g,goalR:gr,goalC:gc};
+}
+
+function resize(){
+  const maxW=Math.min(window.innerWidth-20,480);
+  const maxH=Math.min(window.innerHeight-100,480);
+  cellSize=Math.floor(Math.min(maxW/COLS, maxH/ROWS));
+  canvas.width=cellSize*COLS;
+  canvas.height=cellSize*ROWS;
+}
+
+function initGame(){
+  resize();
+  let result=buildMaze();
+  maze=result.grid;
+  goalX=result.goalC;
+  goalY=result.goalR;
+  px=1.5; py=1.5;
+  pvx=0; pvy=0;
+  trail=[];
+  startTime=performance.now();
+  elapsed=0;
+  gameState='playing';
+}
+
+function startGame(){
+  elMsg.classList.add('hidden');
+  if(window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission==='function'){
+    DeviceOrientationEvent.requestPermission().then(r=>{
+      if(r==='granted') window.addEventListener('deviceorientation', onOrient);
+      else window.addEventListener('deviceorientation', onOrient);
+    }).catch(()=>{});
+  } else {
+    window.addEventListener('deviceorientation', onOrient);
+  }
+  initGame();
+  if(animId) cancelAnimationFrame(animId);
+  loop();
+}
+
+function onOrient(e){
+  let gx=e.gamma||0;
+  let gy=e.beta||0;
+  gravityX=gx/45;
+  gravityY=(gy-45)/45;
+  gravityX=Math.max(-1,Math.min(1,gravityX));
+  gravityY=Math.max(-1,Math.min(1,gravityY));
+}
+
+let mouseDown=false;
+canvas.addEventListener('mousedown',()=>{mouseDown=true;});
+canvas.addEventListener('mouseup',()=>{mouseDown=false;});
+canvas.addEventListener('mouseleave',()=>{mouseDown=false;});
+canvas.addEventListener('mousemove',e=>{
+  if(!mouseDown||gameState!=='playing') return;
+  const rect=canvas.getBoundingClientRect();
+  const mx=(e.clientX-rect.left)/cellSize;
+  const my=(e.clientY-rect.top)/cellSize;
+  gravityX=Math.max(-1,Math.min(1,(mx-px)*0.8));
+  gravityY=Math.max(-1,Math.min(1,(my-py)*0.8));
+});
+canvas.addEventListener('touchstart',e=>{e.preventDefault();mouseDown=true;},{passive:false});
+canvas.addEventListener('touchend',e=>{e.preventDefault();mouseDown=false;},{passive:false});
+canvas.addEventListener('touchmove',e=>{
+  e.preventDefault();
+  if(gameState!=='playing') return;
+  const rect=canvas.getBoundingClientRect();
+  const t=e.touches[0];
+  const mx=(t.clientX-rect.left)/cellSize;
+  const my=(t.clientY-rect.top)/cellSize;
+  gravityX=Math.max(-1,Math.min(1,(mx-px)*0.8));
+  gravityY=Math.max(-1,Math.min(1,(my-py)*0.8));
+},{passive:false});
+
+const FRICTION=0.92;
+const MAX_SPEED=0.12;
+const BALL_R=0.32;
+
+function wallAt(r,c){
+  if(r<0||r>=ROWS||c<0||c>=COLS) return true;
+  return maze[Math.floor(r)][Math.floor(c)]===0;
+}
+
+function update(){
+  if(gameState!=='playing') return;
+  pvx+=gravityX*0.008;
+  pvy+=gravityY*0.008;
+  pvx*=FRICTION;
+  pvy*=FRICTION;
+  pvx=Math.max(-MAX_SPEED,Math.min(MAX_SPEED,pvx));
+  pvy=Math.max(-MAX_SPEED,Math.min(MAX_SPEED,pvy));
+  let nx=px+pvx;
+  let ny=py+pvy;
+  const r=BALL_R;
+  if(!wallAt(py-r,nx+r) && !wallAt(py+r,nx+r) && !wallAt(py-r,nx-r) && !wallAt(py+r,nx-r)){
+    px=nx;
+  } else {
+    pvx*=-0.3;
+    const mc=Math.round(nx);
+    if(wallAt(Math.round(py),mc)) px=mc+(nx<mc?(1-r):(r));
+  }
+  if(!wallAt(ny-r,px+r) && !wallAt(ny+r,px+r) && !wallAt(ny-r,px-r) && !wallAt(ny+r,px-r)){
+    py=ny;
+  } else {
+    pvy*=-0.3;
+    const mr=Math.round(ny);
+    if(wallAt(mr,Math.round(px))) py=mr+(ny<mr?(1-r):(r));
+  }
+  px=Math.max(BALL_R,Math.min(COLS-1-BALL_R,px));
+  py=Math.max(BALL_R,Math.min(ROWS-1-BALL_R,py));
+  if(Math.abs(pvx)>0.005||Math.abs(pvy)>0.005){
+    trail.push({x:px,y:py});
+    if(trail.length>120) trail.shift();
+  }
+  const d=Math.hypot(px-goalX-0.5, py-goalY-0.5);
+  if(d<0.5){
+    gameState='won';
+    elapsed=(performance.now()-startTime)/1000;
+    if(!bestTime||elapsed<parseFloat(bestTime)){
+      bestTime=elapsed.toFixed(2);
+      localStorage.setItem('mazeBest',bestTime);
+      elBest.textContent=parseFloat(bestTime).toFixed(1)+'s';
+    }
+    showWin();
+  }
+  elTilt.textContent=gravityX.toFixed(2)+', '+gravityY.toFixed(2);
+  elapsed=(performance.now()-startTime)/1000;
+  elTime.textContent=elapsed.toFixed(1)+'s';
+}
+
+function draw(){
+  ctx.fillStyle='#0a0a0a';
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  for(let r=0;r<ROWS;r++){
+    for(let c=0;c<COLS;c++){
+      if(maze[r][c]===0){
+        ctx.fillStyle='#1a1a1a';
+        ctx.fillRect(c*cellSize,r*cellSize,cellSize,cellSize);
+        ctx.fillStyle='#222';
+        ctx.fillRect(c*cellSize+1,r*cellSize+1,cellSize-2,1);
+        ctx.fillRect(c*cellSize+1,r*cellSize+1,1,cellSize-2);
+        ctx.fillStyle='#111';
+        ctx.fillRect(c*cellSize+1,r*cellSize+cellSize-2,cellSize-2,1);
+        ctx.fillRect(c*cellSize+cellSize-2,r*cellSize+1,1,cellSize-2);
+      }
+    }
+  }
+  const t=performance.now()/1000;
+  const pulse=0.7+0.3*Math.sin(t*3);
+  ctx.beginPath();
+  ctx.arc((goalX+0.5)*cellSize,(goalY+0.5)*cellSize,cellSize*0.4*pulse,0,Math.PI*2);
+  ctx.fillStyle='#22c55e';
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc((goalX+0.5)*cellSize,(goalY+0.5)*cellSize,cellSize*0.2,0,Math.PI*2);
+  ctx.fillStyle='#4ade80';
+  ctx.fill();
+  for(let i=0;i<trail.length;i++){
+    const a=i/trail.length;
+    ctx.beginPath();
+    ctx.arc(trail[i].x*cellSize,trail[i].y*cellSize,cellSize*0.06*a,0,Math.PI*2);
+    ctx.fillStyle='rgba(239,68,68,'+(a*0.4)+')';
+    ctx.fill();
+  }
+  const bx=px*cellSize, by=py*cellSize;
+  const br=BALL_R*cellSize;
+  ctx.beginPath();
+  ctx.arc(bx,by,br*2.2,0,Math.PI*2);
+  const grd=ctx.createRadialGradient(bx,by,0,bx,by,br*2.2);
+  grd.addColorStop(0,'rgba(239,68,68,0.25)');
+  grd.addColorStop(1,'rgba(239,68,68,0)');
+  ctx.fillStyle=grd;
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(bx,by,br,0,Math.PI*2);
+  const ballGrad=ctx.createRadialGradient(bx-br*0.3,by-br*0.3,0,bx,by,br);
+  ballGrad.addColorStop(0,'#f87171');
+  ballGrad.addColorStop(1,'#dc2626');
+  ctx.fillStyle=ballGrad;
+  ctx.fill();
+}
+
+function loop(){
+  update();
+  draw();
+  animId=requestAnimationFrame(loop);
+}
+
+function showWin(){
+  elMsgTitle.textContent='COMPLETE';
+  elMsgSub.textContent='Time: '+elapsed.toFixed(2)+'s'+(bestTime?' | Best: '+parseFloat(bestTime).toFixed(2)+'s':'');
+  elMsgBtn.textContent='RESTART';
+  elMsg.classList.remove('hidden');
+}
+
+window.addEventListener('resize',()=>{if(maze) resize();});
+resize();
+</script>
+</body>
+</html>
