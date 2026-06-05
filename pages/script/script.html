@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" href="script.css">
+        <title>klokka</title>
+        <script>
+            // starter script når nettside er åpnet
+            window.onload = oppdater;  
+            function oppdater (){
+                var tid = new Date();
+                document.getElementById("SK").innerHTML = tid.getDay() + ":" + tid.getHours() + ":" + tid.getMinutes() + ":" + tid.getSeconds();
+                document.getElementById("year").innerHTML = tid.getFullYear();
+                document.getElementById("month").innerHTML = tid.getMonth();
+                document.getElementById("day").innerHTML = tid.getDay();
+                document.getElementById("hour").innerHTML = tid.getHours();
+                document.getElementById("minut").innerHTML = tid.getMinutes();
+                document.getElementById("second").innerHTML = tid.getSeconds();
+                setTimeout(oppdater, 1000);
+            }
+        </script>
+        <script>
+            window.onload = oppstart;
+
+            function oppstart() {
+                document.getElementById("svar").onclick = vissvar
+            }
+            function vissvar (){
+                document.getElementById("svar").innerHTML = "svaret er 43"
+            }
+        </script>
+    </head> 
+    <body>
+        <p>klokka er: <span id="SK">kan ikke vises</span></p>
+        <h3>year: <span id="year">kan ikke vises</span></h3>
+        <h3>month: <span id="month">kan ikke vises</span></h3>
+        <h3>day: <span id="day">kan ikke vises</span></h3>
+        <h3>hour: <span id="hour">kan ikke vises</span></h3>
+        <h3>minutes: <span id="minut">kan ikke vises</span></h3>
+        <h3>seconds: <span id="second">kan ikke vises</span></h3>
+    </body>
+    <body>
+        <p>hva er riktig svar</p>
+        <p id="svar">klikk for å få svar</p>
+    </body>
+</html>
