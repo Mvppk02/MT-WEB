@@ -8,10 +8,6 @@ const state = {
   isTracking: false,
   isSimulating: false,
   theme: 'dark', // 'dark' | 'light'
-  
-  pois: [], // Array of points of interest from data.json
-  poiMarkers: {}, // Map of POI name to Leaflet marker
-  shownPOIs: new Set(), // Track which POIs have been shown
 
   // GPS & Telemetry Data
   currentPosition: null, // { lat, lng, altitude, accuracy, heading, speed, timestamp }
@@ -31,6 +27,7 @@ const state = {
   peerInstance: null,
   activeConnections: {}, // Map of peerId -> connection
   peerMarkers: {}        // Map of peerId -> Leaflet marker
+  poiMarkers: {}         // Map of POI name -> Leaflet marker
 };
 
 // --- LEAFLET MAP MODULE ---
@@ -89,23 +86,21 @@ function initMap() {
     lineJoin: 'round'
   }).addTo(map);
 
-  // Load points of interest from external JSON
   loadPOIs();
 }
 
 function loadPOIs() {
-  // Fetch data.json from sibling repository
-  fetch('../../CarCVroom_mangeKartPunkt/data.json')
-    .then(res => res.json())
+  fetch('../CarCVroom_mangeKartPunkt/data.json')
+    .then(response => response.json())
     .then(data => {
       state.pois = data;
-      // Create markers for each POI (red by default)
       data.forEach(poi => {
         const marker = L.circleMarker([poi.lat, poi.lon], {
-          radius: 8,
+          radius: 10,
           color: 'red',
+          weight: 2,
           fillColor: 'red',
-          fillOpacity: 0.6,
+          fillOpacity: 0.8
         }).addTo(map);
         state.poiMarkers[poi.name] = marker;
       });
@@ -132,7 +127,7 @@ function setTheme(themeName) {
   if (tileLayer) {
     map.removeLayer(tileLayer);
   }
-  
+
   tileLayer = L.tileLayer(TILES[themeName].url, {
     attribution: TILES[themeName].attribution,
     maxZoom: 20
@@ -146,11 +141,11 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
   const R = 6371; // Earth radius in km
   const dLat = (lat2 - lat1) * Math.PI / 180;
   const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = 
-    Math.sin(dLat/2) * Math.sin(dLat/2) +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-    Math.sin(dLon/2) * Math.sin(dLon/2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
 }
 
@@ -160,7 +155,7 @@ function updateTelemetryUI(speed, distance, altitude, heading, accuracy) {
   const speedPercentage = Math.min(speed / maxSpeed, 1);
   const circumference = 2 * Math.PI * 45; // 282.74
   const dashOffset = circumference * (1 - speedPercentage);
-  
+
   const gaugeFill = document.getElementById('speedGaugeFill');
   if (gaugeFill) {
     gaugeFill.style.strokeDashoffset = dashOffset;
@@ -183,18 +178,18 @@ function updateTelemetryUI(speed, distance, altitude, heading, accuracy) {
 function handlePositionUpdate(position) {
   const { latitude, longitude, altitude, heading, speed, accuracy } = position.coords;
   const timestamp = position.timestamp;
-  
+
   const lat = latitude;
   const lng = longitude;
-  
+
   // Geolocation speed is in m/s, convert to km/h. Default to 0 if null.
   const speedKmh = speed ? (speed * 3.6) : 0;
-  
+
   // Calculate distance traveled if history is populated
   if (state.history.length > 0) {
     const lastPoint = state.history[state.history.length - 1];
     const segmentDistance = calculateDistance(lastPoint.lat, lastPoint.lng, lat, lng);
-    
+
     // Ignore updates that are too tiny/noisy to prevent odometer jitter
     if (segmentDistance > 0.002) {
       state.totalDistance += segmentDistance;
@@ -205,25 +200,7 @@ function handlePositionUpdate(position) {
   state.currentPosition = { lat, lng, altitude, accuracy, heading, speed: speedKmh, timestamp };
   state.history.push({ lat, lng, alt: altitude, time: timestamp, speed: speedKmh });
 
-  // Check proximity to points of interest
-  state.pois.forEach(poi => {
-    const distance = calculateDistance(state.currentPosition.lat, state.currentPosition.lng, poi.lat, poi.lon);
-    const THRESHOLD_KM = 0.05; // 50 meters
-    if (distance <= THRESHOLD_KM && !state.shownPOIs.has(poi.name)) {
-      // Show a Leaflet popup at the POI location
-      L.popup({ closeOnClick: true, maxWidth: 200 })
-        .setLatLng([poi.lat, poi.lon])
-        .setContent(`<b>${poi.name}</b><br/>You have arrived at ${poi.name}`)
-        .openOn(map);
-      state.shownPOIs.add(poi.name);
-      // Change marker color to green
-      const marker = state.poiMarkers[poi.name];
-      if (marker) {
-        marker.setStyle({ color: 'green', fillColor: 'green' });
-      }
-    }
-  });
-
+  // Update UI Telemetry
   updateTelemetryUI(speedKmh, state.totalDistance, altitude, heading, accuracy);
 
   // Update Map Position
@@ -243,6 +220,18 @@ function handlePositionUpdate(position) {
     map.panTo(latlng);
   }
 
+  // Update POI marker colors based on proximity (within 50m)
+  const proximityThresholdKm = 0.05; // 50 meters
+  Object.values(state.poiMarkers).forEach(marker => {
+    const markerPos = marker.getLatLng();
+    const dist = calculateDistance(lat, lng, markerPos.lat, markerPos.lng);
+    if (dist <= proximityThresholdKm) {
+      marker.setStyle({ color: 'green', fillColor: 'green' });
+    } else {
+      marker.setStyle({ color: 'red', fillColor: 'red' });
+    }
+  });
+
   // Enable download export buttons since data exists
   document.getElementById('btnExportGeoJSON').removeAttribute('disabled');
   document.getElementById('btnExportGPX').removeAttribute('disabled');
@@ -258,11 +247,11 @@ function startTimer() {
   state.startTime = new Date();
   state.durationTimer = setInterval(() => {
     state.elapsedSeconds++;
-    
+
     const hrs = String(Math.floor(state.elapsedSeconds / 3600)).padStart(2, '0');
     const mins = String(Math.floor((state.elapsedSeconds % 3600) / 60)).padStart(2, '0');
     const secs = String(state.elapsedSeconds % 60).padStart(2, '0');
-    
+
     document.getElementById('valDuration').innerText = `${hrs}:${mins}:${secs}`;
   }, 1000);
 }
@@ -290,10 +279,10 @@ function toggleTracking() {
 
     btn.classList.remove('active-btn');
     btn.innerHTML = '<i data-lucide="play" class="btn-icon"></i><span>Start Tracking</span>';
-    
+
     banner.className = 'status-banner online';
     banner.innerHTML = '<i data-lucide="shield-check" class="status-icon"></i><span class="status-text">SYSTEM STANDBY</span>';
-    
+
     document.getElementById('btnSimulate').removeAttribute('disabled');
   } else {
     // START TRACKING
@@ -307,10 +296,10 @@ function toggleTracking() {
 
     btn.classList.add('active-btn');
     btn.innerHTML = '<i data-lucide="square" class="btn-icon"></i><span>Stop Tracking</span>';
-    
+
     banner.className = 'status-banner tracking';
     banner.innerHTML = '<i data-lucide="radio" class="status-icon"></i><span class="status-text">TRANSMITTING TELEMETRY</span>';
-    
+
     document.getElementById('btnSimulate').setAttribute('disabled', 'true');
 
     state.watchId = navigator.geolocation.watchPosition(
@@ -369,7 +358,7 @@ function startSimulation() {
     const startLng = center.lng;
 
     state.simIndex = 0;
-    
+
     // Racetrack coordinate calculation formula (lissajous loop style)
     state.simInterval = setInterval(() => {
       state.simIndex++;
@@ -383,7 +372,7 @@ function startSimulation() {
 
       // Simulated telemetry
       // Speed swings dynamically to show dashboard activity
-      const simulatedSpeed = 30 + Math.sin(t * 1.5) * 20; 
+      const simulatedSpeed = 30 + Math.sin(t * 1.5) * 20;
       const simulatedAltitude = 150 + Math.cos(t) * 15;
       const simulatedHeading = (t * (180 / Math.PI)) % 360;
       const simulatedAccuracy = 5 + Math.sin(t) * 2;
@@ -416,7 +405,7 @@ function initPeerJS() {
   state.peerInstance.on('open', (id) => {
     state.myPeerId = id;
     document.getElementById('peerIdDisplay').innerText = id;
-    
+
     const banner = document.getElementById('systemStatus');
     banner.className = 'status-banner online';
     banner.innerHTML = '<i data-lucide="shield-check" class="status-icon"></i><span class="status-text">SYSTEM ONLINE</span>';
@@ -449,7 +438,7 @@ function connectToPeer(targetId) {
     alert('PeerJS client is not initialized yet. Try again in a moment.');
     return;
   }
-  
+
   const peerId = targetId.trim();
   if (!peerId) return;
 
@@ -472,7 +461,7 @@ function setupConnectionListeners(conn) {
 
   conn.on('open', () => {
     state.activeConnections[peerId] = conn;
-    
+
     // Add UI representation for connection
     showConnectedPeerInUI(peerId);
 
@@ -547,7 +536,7 @@ function updatePeerMarker(peerId, telemetry) {
 function showConnectedPeerInUI(peerId) {
   const panel = document.getElementById('activePeersPanel');
   const container = document.getElementById('peersListContainer');
-  
+
   panel.classList.remove('hidden');
 
   const peerItem = document.createElement('div');
@@ -594,7 +583,7 @@ function removeConnectedPeer(peerId) {
 }
 
 // Window global helper for the HTML disconnect button click
-window.disconnectFromPeer = function(peerId) {
+window.disconnectFromPeer = function (peerId) {
   removeConnectedPeer(peerId);
 };
 
@@ -723,7 +712,7 @@ function bindEvents() {
       return;
     }
     const shareUrl = `${window.location.origin}${window.location.pathname}?room=${state.myPeerId}`;
-    
+
     navigator.clipboard.writeText(shareUrl).then(() => {
       alert('Shareable map telemetry URL copied to clipboard!');
     }).catch(err => {
