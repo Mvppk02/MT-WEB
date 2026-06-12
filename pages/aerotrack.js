@@ -10,6 +10,7 @@ const state = {
   theme: 'dark', // 'dark' | 'light'
   
   pois: [], // Array of points of interest from data.json
+  poiMarkers: {}, // Map of POI name to Leaflet marker
   shownPOIs: new Set(), // Track which POIs have been shown
 
   // GPS & Telemetry Data
@@ -98,26 +99,18 @@ function loadPOIs() {
     .then(res => res.json())
     .then(data => {
       state.pois = data;
+      // Create markers for each POI (red by default)
+      data.forEach(poi => {
+        const marker = L.circleMarker([poi.lat, poi.lon], {
+          radius: 8,
+          color: 'red',
+          fillColor: 'red',
+          fillOpacity: 0.6,
+        }).addTo(map);
+        state.poiMarkers[poi.name] = marker;
+      });
     })
     .catch(err => console.error('Failed to load POIs:', err));
-}
-  map = L.map('map', {
-    zoomControl: true,
-    attributionControl: true
-  }).setView([defaultLat, defaultLng], 14);
-
-  // Set initial map theme
-  const savedTheme = localStorage.getItem('aero-theme') || 'dark';
-  setTheme(savedTheme);
-
-  // Polyline for tracking trace
-  pathPolyline = L.polyline([], {
-    color: 'var(--accent-primary)',
-    weight: 4,
-    opacity: 0.85,
-    dashArray: '8, 8',
-    lineJoin: 'round'
-  }).addTo(map);
 }
 
 function setTheme(themeName) {
@@ -223,6 +216,11 @@ function handlePositionUpdate(position) {
         .setContent(`<b>${poi.name}</b><br/>You have arrived at ${poi.name}`)
         .openOn(map);
       state.shownPOIs.add(poi.name);
+      // Change marker color to green
+      const marker = state.poiMarkers[poi.name];
+      if (marker) {
+        marker.setStyle({ color: 'green', fillColor: 'green' });
+      }
     }
   });
 
