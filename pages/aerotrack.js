@@ -84,6 +84,8 @@ function initMap() {
     dashArray: '8, 8',
     lineJoin: 'round'
   }).addTo(map);
+
+  loadPOIs();
 }
 
 function setTheme(themeName) {
