@@ -87,27 +87,17 @@ function initMap() {
 
   loadPOIs();
 
-  if (typeof navigator.permissions !== 'undefined' && navigator.permissions.query) {
-    navigator.permissions.query({ name: 'geolocation' }).then(result => {
-      if (result.state === 'granted') {
-        startTrackingIfWanted();
-      }
-      result.onchange = () => {
-        if (result.state === 'granted') startTrackingIfWanted();
-      };
-    }).catch(() => {
-      // query not supported from this context
-    });
-  }
-}
-
-function startTrackingIfWanted() {
-  if (!state.isTracking && navigator.geolocation) {
+  if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
-      () => {
+      (pos) => {
         try { toggleTracking(); } catch (_) {}
       },
-      () => {}
+      (err) => {
+        if (err && err.code === 1) {
+          try { localStorage.setItem('aero-geo-denied', '1'); } catch (_) {}
+        }
+      },
+      { timeout: 15000, maximumAge: 60000, enableHighAccuracy: true }
     );
   }
 }
