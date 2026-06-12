@@ -26,8 +26,10 @@ const state = {
   myPeerId: null,
   peerInstance: null,
   activeConnections: {}, // Map of peerId -> connection
-  peerMarkers: {}, // Map of peerId -> Leaflet marker
-  poiMarkers: {} // Map of POI name -> Leaflet marker
+  peerMarkers: {},      // Map of peerId -> Leaflet marker
+  poiMarkers: {},       // Map of POI name -> Leaflet marker
+  pois: null,
+  activePOI: null
 };
 
 // --- LEAFLET MAP MODULE ---
@@ -64,8 +66,6 @@ const peerPinIcon = L.divIcon({
 });
 
 function initMap() {
-  console.log('Initializing map...');
-  // Default centered coordinates (Paris, France - placeholder until tracking kicks in)
   const defaultLat = 48.8566;
   const defaultLng = 2.3522;
 
@@ -74,11 +74,9 @@ function initMap() {
     attributionControl: true
   }).setView([defaultLat, defaultLng], 14);
 
-  // Set initial map theme
   const savedTheme = localStorage.getItem('aero-theme') || 'dark';
   setTheme(savedTheme);
 
-  // Polyline for tracking trace
   pathPolyline = L.polyline([], {
     color: 'var(--accent-primary)',
     weight: 4,
@@ -86,44 +84,6 @@ function initMap() {
     dashArray: '8, 8',
     lineJoin: 'round'
   }).addTo(map);
-
-  loadPOIs();
-
-  // Auto‑start tracking if a position is already available
-  if (navigator.geolocation) {
-    try {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          // Position obtained, start tracking (watchPosition will handle updates)
-          toggleTracking();
-        },
-        (err) => {
-          console.warn('Auto‑start tracking unavailable:', err);
-        }
-      );
-    } catch (e) {
-      console.error('Error during auto‑start tracking:', e);
-    }
-  }
-}
-
-function loadPOIs() {
-  fetch('../CarCVroom_mangeKartPunkt/data.json')
-    .then(response => response.json())
-    .then(data => {
-      state.pois = data;
-      data.forEach(poi => {
-        const marker = L.circleMarker([poi.lat, poi.lon], {
-          radius: 10,
-          color: 'red',
-          weight: 2,
-          fillColor: 'red',
-          fillOpacity: 0.8
-        }).addTo(map);
-        state.poiMarkers[poi.name] = marker;
-      });
-    })
-    .catch(err => console.error('Failed to load POIs:', err));
 }
 
 function setTheme(themeName) {
@@ -139,24 +99,68 @@ function setTheme(themeName) {
     document.body.classList.add('dark-theme');
     document.getElementById('themeIcon').setAttribute('data-lucide', 'sun');
   }
-  lucide.createIcons(); // Refresh Lucide elements
-
-  // Re-inject tiles
-  if (tileLayer) {
+  if (typeof lucide !== 'undefined' && lucide.createIcons) {
+    lucide.createIcons();
+  }
+  if (tileLayer && map) {
     map.removeLayer(tileLayer);
   }
-
-  tileLayer = L.tileLayer(TILES[themeName].url, {
-    attribution: TILES[themeName].attribution,
-    maxZoom: 20
-  }).addTo(map);
+  const tileConfig = TILES[themeName];
+  if (tileConfig && map) {
+    tileLayer = L.tileLayer(tileConfig.url, {
+      attribution: tileConfig.attribution,
+      maxZoom: 20
+    }).addTo(map);
+  }
 }
 
-// --- TELEMETRY & DATA UPDATE CONTROLLER ---
+function restoreFromLocalStorage() {
+  try {
+    const savedPeerId = localStorage.getItem('active-peer-id');
+    const savedPOI = localStorage.getItem('active-poi');
+    if (savedPeerId) initPeer(savedPeerId);
+    if (savedPOI) state.activePOI = savedPOI;
+  } catch (_) {
+    // ignore persistence recovery errors
+  }
+}
 
-// Spherical Law of Cosines to find distance between two points in km
+function persistToLocalStorage(key, value) {
+  try {
+    localStorage.setItem(`aerotrack-persist-${key}`, JSON.stringify(value));
+  } catch (_) {
+    // ignore persistence errors
+  }
+}
+
+// Optional POI loader. Kept out of the default init path for now.
+function loadPOIs() {
+  if (typeof fetch === 'undefined') return;
+  fetch('../CarCVroom_mangeKartPunkt/data.json')
+    .then(response => {
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return response.json();
+    })
+    .then(data => {
+      state.pois = data;
+      data.forEach(poi => {
+        const marker = L.circleMarker([poi.lat, poi.lon], {
+          radius: 10,
+          color: 'red',
+          weight: 2,
+          fillColor: 'red',
+          fillOpacity: 0.8
+        }).addTo(map);
+        state.poiMarkers[poi.name || `${poi.lat},${poi.lon}`] = marker;
+      });
+    })
+    .catch(err => {
+      console.warn('POIs not loaded:', err && err.message ? err.message : err);
+    });
+}
+
 function calculateDistance(lat1, lon1, lat2, lon2) {
-  const R = 6371; // Earth radius in km
+  const R = 6371;
   const dLat = (lat2 - lat1) * Math.PI / 180;
   const dLon = (lon2 - lon1) * Math.PI / 180;
   const a =
@@ -168,10 +172,9 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 }
 
 function updateTelemetryUI(speed, distance, altitude, heading, accuracy) {
-  // Speed gauge animation
-  const maxSpeed = 120; // km/h limit on dashboard gauge visual
+  const maxSpeed = 120;
   const speedPercentage = Math.min(speed / maxSpeed, 1);
-  const circumference = 2 * Math.PI * 45; // 282.74
+  const circumference = 2 * Math.PI * 45;
   const dashOffset = circumference * (1 - speedPercentage);
 
   const gaugeFill = document.getElementById('speedGaugeFill');
@@ -179,14 +182,12 @@ function updateTelemetryUI(speed, distance, altitude, heading, accuracy) {
     gaugeFill.style.strokeDashoffset = dashOffset;
   }
 
-  // Value updates
   document.getElementById('valSpeed').innerText = speed.toFixed(1);
   document.getElementById('valDistance').innerText = `${distance.toFixed(2)} km`;
   document.getElementById('valAltitude').innerText = altitude !== null ? `${altitude.toFixed(0)} m` : '-- m';
   document.getElementById('valHeading').innerText = heading !== null ? `${Math.round(heading)}°` : '--°';
   document.getElementById('valAccuracy').innerText = `${accuracy.toFixed(0)} m`;
 
-  // Average speed calculation
   if (state.elapsedSeconds > 0) {
     const avgSpeed = (state.totalDistance / (state.elapsedSeconds / 3600));
     document.getElementById('valAvgSpeed').innerText = `${avgSpeed.toFixed(1)} km/h`;
@@ -200,28 +201,22 @@ function handlePositionUpdate(position) {
   const lat = latitude;
   const lng = longitude;
 
-  // Geolocation speed is in m/s, convert to km/h. Default to 0 if null.
   const speedKmh = speed ? (speed * 3.6) : 0;
 
-  // Calculate distance traveled if history is populated
   if (state.history.length > 0) {
     const lastPoint = state.history[state.history.length - 1];
     const segmentDistance = calculateDistance(lastPoint.lat, lastPoint.lng, lat, lng);
 
-    // Ignore updates that are too tiny/noisy to prevent odometer jitter
     if (segmentDistance > 0.002) {
       state.totalDistance += segmentDistance;
     }
   }
 
-  // Update State
   state.currentPosition = { lat, lng, altitude, accuracy, heading, speed: speedKmh, timestamp };
   state.history.push({ lat, lng, alt: altitude, time: timestamp, speed: speedKmh });
 
-  // Update UI Telemetry
   updateTelemetryUI(speedKmh, state.totalDistance, altitude, heading, accuracy);
 
-  // Update Map Position
   const latlng = [lat, lng];
   if (!userMarker) {
     userMarker = L.marker(latlng, { icon: userPinIcon }).addTo(map);
@@ -230,31 +225,15 @@ function handlePositionUpdate(position) {
     userMarker.setLatLng(latlng);
   }
 
-  // Add point to polyline path
   pathPolyline.addLatLng(latlng);
 
-  // Auto center map if tracking is active
   if (state.isTracking) {
     map.panTo(latlng);
   }
 
-  // Update POI marker colors based on proximity (within 50m)
-  const proximityThresholdKm = 0.05; // 50 meters
-  Object.values(state.poiMarkers).forEach(marker => {
-    const markerPos = marker.getLatLng();
-    const dist = calculateDistance(lat, lng, markerPos.lat, markerPos.lng);
-    if (dist <= proximityThresholdKm) {
-      marker.setStyle({ color: 'green', fillColor: 'green' });
-    } else {
-      marker.setStyle({ color: 'red', fillColor: 'red' });
-    }
-  });
-
-  // Enable download export buttons since data exists
   document.getElementById('btnExportGeoJSON').removeAttribute('disabled');
   document.getElementById('btnExportGPX').removeAttribute('disabled');
 
-  // Push updates to active WebRTC peers
   broadcastToPeers({
     type: 'LOCATION_UPDATE',
     payload: { lat, lng, altitude, speed: speedKmh, heading, accuracy }
@@ -281,13 +260,11 @@ function stopTimer() {
   }
 }
 
-// --- GPS TRACKING TOGGLE MODULE ---
 function toggleTracking() {
   const btn = document.getElementById('btnToggleTrack');
   const banner = document.getElementById('systemStatus');
 
   if (state.isTracking) {
-    // STOP TRACKING
     state.isTracking = false;
     if (state.watchId !== null) {
       navigator.geolocation.clearWatch(state.watchId);
@@ -303,7 +280,6 @@ function toggleTracking() {
 
     document.getElementById('btnSimulate').removeAttribute('disabled');
   } else {
-    // START TRACKING
     if (!navigator.geolocation) {
       alert('Your browser does not support GPS Geolocation.');
       return;
@@ -325,7 +301,7 @@ function toggleTracking() {
       (err) => {
         console.error('GPS Watch error:', err);
         alert(`GPS Position error: ${err.message}. Make sure location access is allowed.`);
-        toggleTracking(); // Shut down gracefully
+        toggleTracking();
       },
       {
         enableHighAccuracy: true,
@@ -337,14 +313,11 @@ function toggleTracking() {
   lucide.createIcons();
 }
 
-// --- GEOLOCATION SIMULATION MODULE (FOR TESTING ON DESKTOP) ---
-// Generates a dynamic racetrack path centered around the map's current center coordinates
 function startSimulation() {
   const btn = document.getElementById('btnSimulate');
   const banner = document.getElementById('systemStatus');
 
   if (state.isSimulating) {
-    // STOP SIMULATION
     state.isSimulating = false;
     clearInterval(state.simInterval);
     state.simInterval = null;
@@ -358,7 +331,6 @@ function startSimulation() {
 
     document.getElementById('btnToggleTrack').removeAttribute('disabled');
   } else {
-    // START SIMULATION
     state.isSimulating = true;
     startTimer();
 
@@ -370,26 +342,21 @@ function startSimulation() {
 
     document.getElementById('btnToggleTrack').setAttribute('disabled', 'true');
 
-    // Base point is map center
     const center = map.getCenter();
     const startLat = center.lat;
     const startLng = center.lng;
 
     state.simIndex = 0;
 
-    // Racetrack coordinate calculation formula (lissajous loop style)
     state.simInterval = setInterval(() => {
       state.simIndex++;
       const t = state.simIndex * 0.04;
-      // Scale offsets to make movement look fast but detailed
       const offsetLat = Math.sin(t) * 0.005;
       const offsetLng = Math.sin(t * 2) * 0.008;
 
       const currentLat = startLat + offsetLat;
       const currentLng = startLng + offsetLng;
 
-      // Simulated telemetry
-      // Speed swings dynamically to show dashboard activity
       const simulatedSpeed = 30 + Math.sin(t * 1.5) * 20;
       const simulatedAltitude = 150 + Math.cos(t) * 15;
       const simulatedHeading = (t * (180 / Math.PI)) % 360;
@@ -401,7 +368,7 @@ function startSimulation() {
           longitude: currentLng,
           altitude: simulatedAltitude,
           heading: simulatedHeading,
-          speed: simulatedSpeed / 3.6, // convert back to m/s so callback processes it right
+          speed: simulatedSpeed / 3.6,
           accuracy: simulatedAccuracy
         },
         timestamp: Date.now()
@@ -413,9 +380,7 @@ function startSimulation() {
   lucide.createIcons();
 }
 
-// --- PeerJS P2P COMMUNICATION MODULE ---
 function initPeerJS() {
-  // Initialize PeerJS broker server
   state.peerInstance = new Peer(null, {
     debug: 2
   });
@@ -429,7 +394,6 @@ function initPeerJS() {
     banner.innerHTML = '<i data-lucide="shield-check" class="status-icon"></i><span class="status-text">SYSTEM ONLINE</span>';
     lucide.createIcons();
 
-    // Check query params to auto-join a shared link session
     const urlParams = new URLSearchParams(window.location.search);
     const joinRoomId = urlParams.get('room');
     if (joinRoomId) {
@@ -480,10 +444,8 @@ function setupConnectionListeners(conn) {
   conn.on('open', () => {
     state.activeConnections[peerId] = conn;
 
-    // Add UI representation for connection
     showConnectedPeerInUI(peerId);
 
-    // If currently tracking or simulating, immediately send latest coordinate
     if (state.currentPosition) {
       conn.send({
         type: 'LOCATION_UPDATE',
@@ -524,19 +486,17 @@ function broadcastToPeers(msg) {
 }
 
 function updatePeerMarker(peerId, telemetry) {
-  const { lat, lng, altitude, speed, heading } = telemetry;
+  const { lat, lng, altitude, speed } = telemetry;
   const latlng = [lat, lng];
 
   let marker = state.peerMarkers[peerId];
   if (!marker) {
-    // Create new peer marker with custom SVG icon
     marker = L.marker(latlng, { icon: peerPinIcon }).addTo(map);
     state.peerMarkers[peerId] = marker;
   } else {
     marker.setLatLng(latlng);
   }
 
-  // Bind/Update Popup details
   const formattedSpeed = speed ? `${speed.toFixed(1)} km/h` : 'Stopped';
   const formattedAlt = altitude ? `${Math.round(altitude)}m` : '--';
   marker.bindPopup(`
@@ -546,9 +506,6 @@ function updatePeerMarker(peerId, telemetry) {
       <p><b>Altitude:</b> ${formattedAlt}</p>
     </div>
   `);
-
-  // Animate map fit bounds if necessary, or let the user decide.
-  // We'll keep focus on current tracker unless user pans manually.
 }
 
 function showConnectedPeerInUI(peerId) {
@@ -565,7 +522,7 @@ function showConnectedPeerInUI(peerId) {
       <div class="peer-status-dot"></div>
       <span class="peer-name" title="${peerId}">Relay: ${peerId.substring(0, 8)}...</span>
     </div>
-    <button class="btn-peer-disconnect" onclick="disconnectFromPeer('${peerId}')" title="Disconnect Peer">
+    <button class="btn-peer-disconnect" onclick="disconnectFromPeer('${peerId.replace(/'/g, "\\'")}')" title="Disconnect Peer">
       <i data-lucide="x-circle"></i>
     </button>
   `;
@@ -575,38 +532,31 @@ function showConnectedPeerInUI(peerId) {
 }
 
 function removeConnectedPeer(peerId) {
-  // Remove marker from map
   const marker = state.peerMarkers[peerId];
   if (marker) {
     map.removeLayer(marker);
     delete state.peerMarkers[peerId];
   }
 
-  // Remove connection
   if (state.activeConnections[peerId]) {
     state.activeConnections[peerId].close();
     delete state.activeConnections[peerId];
   }
 
-  // Remove UI element
   const item = document.getElementById(`ui-peer-${peerId}`);
   if (item) {
     item.remove();
   }
 
-  // Hide list wrapper if empty
   if (Object.keys(state.activeConnections).length === 0) {
     document.getElementById('activePeersPanel').classList.add('hidden');
   }
 }
 
-// Window global helper for the HTML disconnect button click
 window.disconnectFromPeer = function (peerId) {
   removeConnectedPeer(peerId);
 };
 
-
-// --- TELEMETRY EXPORT SERVICES (GeoJSON & GPX) ---
 function exportGeoJSON() {
   if (state.history.length === 0) return;
 
@@ -698,13 +648,10 @@ function clearTrackHistory() {
   }
 }
 
-// --- DOM EVENT LISTENERS ---
 function bindEvents() {
-  // Tracking & Sim Toggles
   document.getElementById('btnToggleTrack').addEventListener('click', toggleTracking);
   document.getElementById('btnSimulate').addEventListener('click', startSimulation);
 
-  // Map settings controls
   document.getElementById('btnThemeToggle').addEventListener('click', () => {
     const nextTheme = state.theme === 'dark' ? 'light' : 'dark';
     setTheme(nextTheme);
@@ -718,12 +665,10 @@ function bindEvents() {
     }
   });
 
-  // Export buttons
   document.getElementById('btnExportGeoJSON').addEventListener('click', exportGeoJSON);
   document.getElementById('btnExportGPX').addEventListener('click', exportGPX);
   document.getElementById('btnClearData').addEventListener('click', clearTrackHistory);
 
-  // Share session copy
   document.getElementById('btnShareSession').addEventListener('click', () => {
     if (!state.myPeerId) {
       alert('Peer session not established yet.');
@@ -735,12 +680,10 @@ function bindEvents() {
       alert('Shareable map telemetry URL copied to clipboard!');
     }).catch(err => {
       console.error('Copy share link error:', err);
-      // Fallback
       prompt('Copy your sharing link manually:', shareUrl);
     });
   });
 
-  // Connect manually
   document.getElementById('btnConnectPeer').addEventListener('click', () => {
     const inputVal = document.getElementById('inputPeerId').value;
     if (inputVal) {
@@ -749,7 +692,6 @@ function bindEvents() {
     }
   });
 
-  // Mobile navigation bottom sheet drawer
   const mobileToggle = document.getElementById('mobilePanelToggle');
   const sidebar = document.getElementById('dashboardPanel');
   const chevron = document.getElementById('toggleChevron');
@@ -757,16 +699,11 @@ function bindEvents() {
   mobileToggle.addEventListener('click', () => {
     sidebar.classList.toggle('expanded');
     mobileToggle.classList.toggle('active');
-    if (sidebar.classList.contains('expanded')) {
-      chevron.setAttribute('data-lucide', 'chevron-down');
-    } else {
-      chevron.setAttribute('data-lucide', 'chevron-up');
-    }
+    chevron.setAttribute('data-lucide', sidebar.classList.contains('expanded') ? 'chevron-down' : 'chevron-up');
     lucide.createIcons();
   });
 }
 
-// --- INITIALIZE APPLICATION ---
 window.addEventListener('DOMContentLoaded', () => {
   initMap();
   bindEvents();
