@@ -902,6 +902,57 @@ body, html {
 /* -------------------------------------------------------------
  * KEYFRAME ANIMATIONS
  * ------------------------------------------------------------- */
+
+/* Mobile enhancements for touch friendliness */
+@media (max-width: 600px) {
+  .btn {
+    padding: 14px 20px;
+    font-size: 15px;
+  }
+  .btn-icon {
+    width: 20px;
+    height: 20px;
+  }
+  .mobile-panel-toggle {
+    width: 60px;
+    height: 60px;
+  }
+  .dashboard-panel {
+    height: 70vh;
+  }
+  .map-viewport {
+    height: 100vh;
+  }
+}
+
+/* -------------------------------------------------------------
+ * KEYFRAME ANIMATIONS
+ * ------------------------------------------------------------- */
+ * KEYFRAME ANIMATIONS
+ * ------------------------------------------------------------- */
+
+/* Mobile enhancements for touch friendliness */
+@media (max-width: 600px) {
+  .btn {
+    padding: 14px 20px;
+    font-size: 15px;
+  }
+  .btn-icon {
+    width: 20px;
+    height: 20px;
+  }
+  .mobile-panel-toggle {
+    width: 60px;
+    height: 60px;
+  }
+  .dashboard-panel {
+    height: 70vh;
+  }
+  .map-viewport {
+    height: 100vh;
+  }
+}
+
 @keyframes logo-glow {
   0%, 100% {
     transform: scale(1);
