@@ -198,42 +198,17 @@ function loadPOIs() {
     });
 }
 
-// Show route from user's last known or current position to the selected POI, and highlight that POI marker.
+// Show route from user's last known or current position to the selected POI, without changing dot colors.
 function selectPOI(key) {
-  const originalActivePOI = state.activePOI;
-
-  // Reset all POI markers to neutral state
-  Object.entries(state.poiMarkers).forEach(([poiKey, marker]) => {
-    if (poiKey === key) return;
-    marker.setStyle({ color: 'red', fillColor: 'red', fillOpacity: 0.8 });
-  });
-
-  // Highlight selected POI
-  state.activePOI = key;
-  const selectedMarker = state.poiMarkers[key];
-  if (selectedMarker) {
-    selectedMarker.setStyle({ color: '#4ade80', fillColor: '#4ade80', fillOpacity: 1 });
-  }
-
-  const poi = state.pois && state.pois.find(p => (p.name || `${p.lat},${p.lon}`) === key);
-  if (!poi) return;
-
-  // If user clicks the already-selected POI, deselect it
-  if (originalActivePOI === key && selectedMarker) {
-    selectedMarker.setStyle({ color: 'red', fillColor: 'red', fillOpacity: 0.8 });
-    state.activePOI = null;
-    if (state.poiRouteLine) {
-      map.removeLayer(state.poiRouteLine);
-      state.poiRouteLine = null;
-    }
-    selectedMarker.closePopup();
-    return;
-  }
-
   if (state.poiRouteLine) {
     map.removeLayer(state.poiRouteLine);
     state.poiRouteLine = null;
   }
+
+  state.activePOI = key;
+
+  const poi = state.pois && state.pois.find(p => (p.name || `${p.lat},${p.lon}`) === key);
+  if (!poi) return;
 
   const origin = state.currentPosition
     ? [state.currentPosition.lat, state.currentPosition.lng]
@@ -247,11 +222,14 @@ function selectPOI(key) {
     lineJoin: 'round'
   }).addTo(map);
 
-  const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(poi.name || '')}&destination_place_id=&travelmode=walking`;
-  const appleMapsUrl = `http://maps.apple.com/?daddr=${encodeURIComponent(poi.name || '')}&dirflg=w`;
-  const osrmUrl = `https://router.project-osrm.org/route/v1/foot/${origin[1]},${origin[0]};${poi.lon},${poi.lat}?overview=full&geometries=geojson`;
+  const walkUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(poi.name || '')}&destination_place_id=&travelmode=walking`;
+  const cycleUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(poi.name || '')}&destination_place_id=&travelmode=bicycling`;
+  const appleFootUrl = `http://maps.apple.com/?daddr=${encodeURIComponent(poi.name || '')}&dirflg=w`;
+  const appleCycleUrl = `http://maps.apple.com/?daddr=${encodeURIComponent(poi.name || '')}&dirflg=c`;
+  const osrmFootUrl = `https://router.project-osrm.org/route/v1/foot/${origin[1]},${origin[0]};${poi.lon},${poi.lat}?overview=full&geometries=geojson`;
+  const osrmCycleUrl = `https://router.project-osrm.org/route/v1/bike/${origin[1]},${origin[0]};${poi.lon},${poi.lat}?overview=full&geometries=geojson`;
 
-  fetch(osrmUrl)
+  fetch(osrmFootUrl)
     .then(res => res.json())
     .then(osrmData => {
       if (state.poiRouteLine) {
@@ -261,24 +239,27 @@ function selectPOI(key) {
       if (osrmData.code === 'Ok' && osrmData.routes && osrmData.routes[0]) {
         const coords = osrmData.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
         state.poiRouteLine = L.polyline(coords, {
-          color: '#facc15',
+          color: '#4ade80',
           weight: 3,
           opacity: 0.9,
           dashArray: '6, 4',
           lineJoin: 'round'
         }).addTo(map);
       } else {
-        resetRouteFallback(origin, poi);
+        resetRouteFallback(origin, poi, '#facc15');
       }
     })
-    .catch(() => resetRouteFallback(origin, poi));
+    .catch(() => resetRouteFallback(origin, poi, '#facc15'));
 
+  const selectedMarker = state.poiMarkers[key];
   if (selectedMarker) {
     const popupContent = `
       <div>
         <b>${poi.name || 'POI'}</b>
-        <div><a href="${googleMapsUrl}" target="_blank" rel="noopener">Google Maps</a></div>
-        <div><a href="${appleMapsUrl}" target="_blank" rel="noopener">Apple Maps</a></div>
+        <div><a href="${walkUrl}" target="_blank" rel="noopener">Walking</a></div>
+        <div><a href="${cycleUrl}" target="_blank" rel="noopener">Cycling</a></div>
+        <div><a href="${appleFootUrl}" target="_blank" rel="noopener">Apple Maps Walking</a></div>
+        <div><a href="${appleCycleUrl}" target="_blank" rel="noopener">Apple Maps Cycling</a></div>
       </div>
     `;
     selectedMarker.unbindPopup();
@@ -287,13 +268,13 @@ function selectPOI(key) {
   }
 }
 
-function resetRouteFallback(origin, poi) {
+function resetRouteFallback(origin, poi, color) {
   if (state.poiRouteLine) {
     map.removeLayer(state.poiRouteLine);
     state.poiRouteLine = null;
   }
   state.poiRouteLine = L.polyline([origin, [poi.lat, poi.lon]], {
-    color: '#facc15',
+    color: color || '#facc15',
     weight: 3,
     opacity: 0.9,
     dashArray: '6, 4',
