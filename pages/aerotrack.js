@@ -26,8 +26,8 @@ const state = {
   myPeerId: null,
   peerInstance: null,
   activeConnections: {}, // Map of peerId -> connection
-  peerMarkers: {}        // Map of peerId -> Leaflet marker
-  poiMarkers: {}         // Map of POI name -> Leaflet marker
+  peerMarkers: {}, // Map of peerId -> Leaflet marker
+  poiMarkers: {} // Map of POI name -> Leaflet marker
 };
 
 // --- LEAFLET MAP MODULE ---
@@ -64,6 +64,7 @@ const peerPinIcon = L.divIcon({
 });
 
 function initMap() {
+  console.log('Initializing map...');
   // Default centered coordinates (Paris, France - placeholder until tracking kicks in)
   const defaultLat = 48.8566;
   const defaultLng = 2.3522;
@@ -87,6 +88,23 @@ function initMap() {
   }).addTo(map);
 
   loadPOIs();
+
+  // Auto‑start tracking if a position is already available
+  if (navigator.geolocation) {
+    try {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          // Position obtained, start tracking (watchPosition will handle updates)
+          toggleTracking();
+        },
+        (err) => {
+          console.warn('Auto‑start tracking unavailable:', err);
+        }
+      );
+    } catch (e) {
+      console.error('Error during auto‑start tracking:', e);
+    }
+  }
 }
 
 function loadPOIs() {
