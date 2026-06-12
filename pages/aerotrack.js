@@ -9,6 +9,9 @@ const state = {
   isSimulating: false,
   theme: 'dark', // 'dark' | 'light'
   
+  pois: [], // Array of points of interest from data.json
+  shownPOIs: new Set(), // Track which POIs have been shown
+
   // GPS & Telemetry Data
   currentPosition: null, // { lat, lng, altitude, accuracy, heading, speed, timestamp }
   history: [],          // Array of coordinate points logged over time: [ {lat, lng, alt, time, speed} ]
@@ -66,7 +69,38 @@ function initMap() {
   // Default centered coordinates (Paris, France - placeholder until tracking kicks in)
   const defaultLat = 48.8566;
   const defaultLng = 2.3522;
-  
+
+  map = L.map('map', {
+    zoomControl: true,
+    attributionControl: true
+  }).setView([defaultLat, defaultLng], 14);
+
+  // Set initial map theme
+  const savedTheme = localStorage.getItem('aero-theme') || 'dark';
+  setTheme(savedTheme);
+
+  // Polyline for tracking trace
+  pathPolyline = L.polyline([], {
+    color: 'var(--accent-primary)',
+    weight: 4,
+    opacity: 0.85,
+    dashArray: '8, 8',
+    lineJoin: 'round'
+  }).addTo(map);
+
+  // Load points of interest from external JSON
+  loadPOIs();
+}
+
+function loadPOIs() {
+  // Fetch data.json from sibling repository
+  fetch('../../CarCVroom_mangeKartPunkt/data.json')
+    .then(res => res.json())
+    .then(data => {
+      state.pois = data;
+    })
+    .catch(err => console.error('Failed to load POIs:', err));
+}
   map = L.map('map', {
     zoomControl: true,
     attributionControl: true
@@ -178,7 +212,20 @@ function handlePositionUpdate(position) {
   state.currentPosition = { lat, lng, altitude, accuracy, heading, speed: speedKmh, timestamp };
   state.history.push({ lat, lng, alt: altitude, time: timestamp, speed: speedKmh });
 
-  // Update UI Telemetry
+  // Check proximity to points of interest
+  state.pois.forEach(poi => {
+    const distance = calculateDistance(state.currentPosition.lat, state.currentPosition.lng, poi.lat, poi.lon);
+    const THRESHOLD_KM = 0.05; // 50 meters
+    if (distance <= THRESHOLD_KM && !state.shownPOIs.has(poi.name)) {
+      // Show a Leaflet popup at the POI location
+      L.popup({ closeOnClick: true, maxWidth: 200 })
+        .setLatLng([poi.lat, poi.lon])
+        .setContent(`<b>${poi.name}</b><br/>You have arrived at ${poi.name}`)
+        .openOn(map);
+      state.shownPOIs.add(poi.name);
+    }
+  });
+
   updateTelemetryUI(speedKmh, state.totalDistance, altitude, heading, accuracy);
 
   // Update Map Position

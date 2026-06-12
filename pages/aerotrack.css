@@ -770,6 +770,12 @@ body, html {
   background: var(--bg-app) !important;
 }
 
+.light-theme .leaflet-container {
+  filter: brightness(0.85) contrast(0.95);
+}
+
+
+
 .leaflet-control-attribution {
   background: rgba(0, 0, 0, 0.4) !important;
   color: var(--text-muted) !important;
