@@ -175,24 +175,21 @@ function loadPOIs() {
           color: 'red',
           weight: 2,
           fillColor: 'red',
-          fillOpacity: 0.8
+          fillOpacity: 0.8,
+          interactive: true
         }).addTo(map);
         state.poiMarkers[poi.name || `${poi.lat},${poi.lon}`] = marker;
 
-        marker.on('click', () => {
-          activatePOI(marker, poi);
-        });
+        marker.on('click', () => selectPOI(poi.name || `${poi.lat},${poi.lon}`));
 
         marker.on('mouseover', () => {
-          if (state.activePOI !== (poi.name || `${poi.lat},${poi.lon}`)) {
-            marker.setStyle({ fillOpacity: 0.9 });
-          }
+          const key = poi.name || `${poi.lat},${poi.lon}`;
+          if (state.activePOI !== key) marker.setStyle({ fillOpacity: 0.95 });
         });
 
         marker.on('mouseout', () => {
-          if (state.activePOI !== (poi.name || `${poi.lat},${poi.lon}`)) {
-            marker.setStyle({ fillOpacity: 0.8 });
-          }
+          const key = poi.name || `${poi.lat},${poi.lon}`;
+          if (state.activePOI !== key) marker.setStyle({ fillOpacity: 0.8 });
         });
       });
     })
@@ -201,8 +198,38 @@ function loadPOIs() {
     });
 }
 
-// Show route from user's last known or current position to the selected POI.
-function activatePOI(marker, poi) {
+// Show route from user's last known or current position to the selected POI, and highlight that POI marker.
+function selectPOI(key) {
+  const originalActivePOI = state.activePOI;
+
+  // Reset all POI markers to neutral state
+  Object.entries(state.poiMarkers).forEach(([poiKey, marker]) => {
+    if (poiKey === key) return;
+    marker.setStyle({ color: 'red', fillColor: 'red', fillOpacity: 0.8 });
+  });
+
+  // Highlight selected POI
+  state.activePOI = key;
+  const selectedMarker = state.poiMarkers[key];
+  if (selectedMarker) {
+    selectedMarker.setStyle({ color: '#4ade80', fillColor: '#4ade80', fillOpacity: 1 });
+  }
+
+  const poi = state.pois && state.pois.find(p => (p.name || `${p.lat},${p.lon}`) === key);
+  if (!poi) return;
+
+  // If user clicks the already-selected POI, deselect it
+  if (originalActivePOI === key && selectedMarker) {
+    selectedMarker.setStyle({ color: 'red', fillColor: 'red', fillOpacity: 0.8 });
+    state.activePOI = null;
+    if (state.poiRouteLine) {
+      map.removeLayer(state.poiRouteLine);
+      state.poiRouteLine = null;
+    }
+    selectedMarker.closePopup();
+    return;
+  }
+
   if (state.poiRouteLine) {
     map.removeLayer(state.poiRouteLine);
     state.poiRouteLine = null;
@@ -220,8 +247,6 @@ function activatePOI(marker, poi) {
     lineJoin: 'round'
   }).addTo(map);
 
-  state.activePOI = poi.name || `${poi.lat},${poi.lon}`;
-
   const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(poi.name || '')}&destination_place_id=&travelmode=walking`;
   const appleMapsUrl = `http://maps.apple.com/?daddr=${encodeURIComponent(poi.name || '')}&dirflg=w`;
   const osrmUrl = `https://router.project-osrm.org/route/v1/foot/${origin[1]},${origin[0]};${poi.lon},${poi.lat}?overview=full&geometries=geojson`;
@@ -231,6 +256,7 @@ function activatePOI(marker, poi) {
     .then(osrmData => {
       if (state.poiRouteLine) {
         map.removeLayer(state.poiRouteLine);
+        state.poiRouteLine = null;
       }
       if (osrmData.code === 'Ok' && osrmData.routes && osrmData.routes[0]) {
         const coords = osrmData.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
@@ -242,39 +268,37 @@ function activatePOI(marker, poi) {
           lineJoin: 'round'
         }).addTo(map);
       } else {
-        state.poiRouteLine = L.polyline([origin, [poi.lat, poi.lon]], {
-          color: '#facc15',
-          weight: 3,
-          opacity: 0.9,
-          dashArray: '6, 4',
-          lineJoin: 'round'
-        }).addTo(map);
+        resetRouteFallback(origin, poi);
       }
     })
-    .catch(() => {
-      if (state.poiRouteLine) {
-        map.removeLayer(state.poiRouteLine);
-      }
-      state.poiRouteLine = L.polyline([origin, [poi.lat, poi.lon]], {
-        color: '#facc15',
-        weight: 3,
-        opacity: 0.9,
-        dashArray: '6, 4',
-        lineJoin: 'round'
-      }).addTo(map);
-    });
+    .catch(() => resetRouteFallback(origin, poi));
 
-  const popupContent = `
-    <div>
-      <b>${poi.name || 'POI'}</b>
-      <div><a href="${googleMapsUrl}" target="_blank" rel="noopener">Google Maps</a></div>
-      <div><a href="${appleMapsUrl}" target="_blank" rel="noopener">Apple Maps</a></div>
-    </div>
-  `;
+  if (selectedMarker) {
+    const popupContent = `
+      <div>
+        <b>${poi.name || 'POI'}</b>
+        <div><a href="${googleMapsUrl}" target="_blank" rel="noopener">Google Maps</a></div>
+        <div><a href="${appleMapsUrl}" target="_blank" rel="noopener">Apple Maps</a></div>
+      </div>
+    `;
+    selectedMarker.unbindPopup();
+    selectedMarker.bindPopup(popupContent);
+    selectedMarker.openPopup();
+  }
+}
 
-  marker.unbindPopup();
-  marker.bindPopup(popupContent);
-  marker.openPopup();
+function resetRouteFallback(origin, poi) {
+  if (state.poiRouteLine) {
+    map.removeLayer(state.poiRouteLine);
+    state.poiRouteLine = null;
+  }
+  state.poiRouteLine = L.polyline([origin, [poi.lat, poi.lon]], {
+    color: '#facc15',
+    weight: 3,
+    opacity: 0.9,
+    dashArray: '6, 4',
+    lineJoin: 'round'
+  }).addTo(map);
 }
 
 function calculateDistance(lat1, lon1, lat2, lon2) {
