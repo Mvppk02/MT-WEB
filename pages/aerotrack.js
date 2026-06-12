@@ -162,7 +162,7 @@ function persistToLocalStorage(key, value) {
 // Optional POI loader. Kept out of the default init path for now.
 function loadPOIs() {
   if (typeof fetch === 'undefined') return;
-  fetch('https://raw.githubusercontent.com/CarCVroom/mangeKartPunkt/main/data.json')
+  fetch('https://carcvroom.pythonanywhere.com/api/data')
     .then(response => {
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       return response.json();
