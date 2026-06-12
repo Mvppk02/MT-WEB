@@ -373,12 +373,36 @@ function handlePositionUpdate(position) {
     map.panTo(latlng);
   }
 
+  updatePOIProximity(lat, lng);
+
   document.getElementById('btnExportGeoJSON').removeAttribute('disabled');
   document.getElementById('btnExportGPX').removeAttribute('disabled');
 
   broadcastToPeers({
     type: 'LOCATION_UPDATE',
     payload: { lat, lng, altitude, speed: speedKmh, heading, accuracy }
+  });
+}
+
+function updatePOIProximity(lat, lng) {
+  if (!state.pois || !Object.keys(state.poiMarkers).length) return;
+
+  const proximityThresholdKm = 0.05;
+
+  state.pois.forEach(poi => {
+    const key = poi.name || `${poi.lat},${poi.lon}`;
+    const marker = state.poiMarkers[key];
+    if (!marker) return;
+
+    const dist = typeof calculateDistance === 'function'
+      ? calculateDistance(lat, lng, poi.lat, poi.lon)
+      : 999;
+
+    if (dist <= proximityThresholdKm) {
+      marker.setStyle({ color: '#4ade80', fillColor: '#4ade80', fillOpacity: 1 });
+    } else if (state.activePOI !== key) {
+      marker.setStyle({ color: 'red', fillColor: 'red', fillOpacity: 0.8 });
+    }
   });
 }
 
