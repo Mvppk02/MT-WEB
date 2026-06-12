@@ -86,6 +86,30 @@ function initMap() {
   }).addTo(map);
 
   loadPOIs();
+
+  if (typeof navigator.permissions !== 'undefined' && navigator.permissions.query) {
+    navigator.permissions.query({ name: 'geolocation' }).then(result => {
+      if (result.state === 'granted') {
+        startTrackingIfWanted();
+      }
+      result.onchange = () => {
+        if (result.state === 'granted') startTrackingIfWanted();
+      };
+    }).catch(() => {
+      // query not supported from this context
+    });
+  }
+}
+
+function startTrackingIfWanted() {
+  if (!state.isTracking && navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      () => {
+        try { toggleTracking(); } catch (_) {}
+      },
+      () => {}
+    );
+  }
 }
 
 function setTheme(themeName) {
