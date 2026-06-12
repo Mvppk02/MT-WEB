@@ -387,7 +387,7 @@ function handlePositionUpdate(position) {
 function updatePOIProximity(lat, lng) {
   if (!state.pois || !Object.keys(state.poiMarkers).length) return;
 
-  const proximityThresholdKm = 0.05;
+  const proximityThresholdKm = 0.025;
 
   state.pois.forEach(poi => {
     const key = poi.name || `${poi.lat},${poi.lon}`;
