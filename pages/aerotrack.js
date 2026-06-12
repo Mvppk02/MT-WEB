@@ -29,8 +29,29 @@ const state = {
   peerMarkers: {},      // Map of peerId -> Leaflet marker
   poiMarkers: {},       // Map of POI name -> Leaflet marker
   pois: null,
-  activePOI: null
+  activePOI: null,
+  visitedPOIKeys: new Set()
 };
+
+function loadVisitedPOIs() {
+  try {
+    const raw = localStorage.getItem('aero-visited-pois');
+    const arr = raw ? JSON.parse(raw) : [];
+    Array.isArray(arr).forEach((item) => {
+      try { state.visitedPOIKeys.add(item); } catch (_) {}
+    });
+  } catch (_) {
+    // ignore persistence errors
+  }
+}
+
+function saveVisitedPOIs() {
+  try {
+    localStorage.setItem('aero-visited-pois', JSON.stringify(Array.from(state.visitedPOIKeys)));
+  } catch (_) {
+    // ignore persistence errors
+  }
+}
 
 // --- LEAFLET MAP MODULE ---
 let map = null;
@@ -86,6 +107,7 @@ function initMap() {
   }).addTo(map);
 
   loadPOIs();
+  loadVisitedPOIs();
 
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
@@ -160,6 +182,7 @@ function loadPOIs() {
     .then(data => {
       state.pois = data;
       data.forEach(poi => {
+        const key = poi.name || `${poi.lat},${poi.lon}`;
         const marker = L.circleMarker([poi.lat, poi.lon], {
           radius: 10,
           color: 'red',
@@ -168,7 +191,11 @@ function loadPOIs() {
           fillOpacity: 0.8,
           interactive: true
         }).addTo(map);
-        state.poiMarkers[poi.name || `${poi.lat},${poi.lon}`] = marker;
+        state.poiMarkers[key] = marker;
+
+        if (state.visitedPOIKeys.has(key)) {
+          marker.setStyle({ color: '#4ade80', fillColor: '#4ade80', fillOpacity: 1 });
+        }
 
         marker.on('click', () => selectPOI(poi.name || `${poi.lat},${poi.lon}`));
 
@@ -370,8 +397,12 @@ function updatePOIProximity(lat, lng) {
       : 999;
 
     if (dist <= proximityThresholdKm) {
+      if (!state.visitedPOIKeys.has(key)) {
+        state.visitedPOIKeys.add(key);
+        saveVisitedPOIs();
+      }
       marker.setStyle({ color: '#4ade80', fillColor: '#4ade80', fillOpacity: 1 });
-    } else if (state.activePOI !== key) {
+    } else if (state.activePOI !== key && !state.visitedPOIKeys.has(key)) {
       marker.setStyle({ color: 'red', fillColor: 'red', fillOpacity: 0.8 });
     }
   });
