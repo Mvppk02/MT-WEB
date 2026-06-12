@@ -178,11 +178,103 @@ function loadPOIs() {
           fillOpacity: 0.8
         }).addTo(map);
         state.poiMarkers[poi.name || `${poi.lat},${poi.lon}`] = marker;
+
+        marker.on('click', () => {
+          activatePOI(marker, poi);
+        });
+
+        marker.on('mouseover', () => {
+          if (state.activePOI !== (poi.name || `${poi.lat},${poi.lon}`)) {
+            marker.setStyle({ fillOpacity: 0.9 });
+          }
+        });
+
+        marker.on('mouseout', () => {
+          if (state.activePOI !== (poi.name || `${poi.lat},${poi.lon}`)) {
+            marker.setStyle({ fillOpacity: 0.8 });
+          }
+        });
       });
     })
     .catch(err => {
       console.warn('POIs not loaded:', err && err.message ? err.message : err);
     });
+}
+
+// Show route from user's last known or current position to the selected POI.
+function activatePOI(marker, poi) {
+  if (state.poiRouteLine) {
+    map.removeLayer(state.poiRouteLine);
+    state.poiRouteLine = null;
+  }
+
+  const origin = state.currentPosition
+    ? [state.currentPosition.lat, state.currentPosition.lng]
+    : [map.getCenter().lat, map.getCenter().lng];
+
+  state.poiRouteLine = L.polyline([origin, [poi.lat, poi.lon]], {
+    color: '#facc15',
+    weight: 3,
+    opacity: 0.9,
+    dashArray: '6, 4',
+    lineJoin: 'round'
+  }).addTo(map);
+
+  state.activePOI = poi.name || `${poi.lat},${poi.lon}`;
+
+  const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(poi.name || '')}&destination_place_id=&travelmode=walking`;
+  const appleMapsUrl = `http://maps.apple.com/?daddr=${encodeURIComponent(poi.name || '')}&dirflg=w`;
+  const osrmUrl = `https://router.project-osrm.org/route/v1/foot/${origin[1]},${origin[0]};${poi.lon},${poi.lat}?overview=full&geometries=geojson`;
+
+  fetch(osrmUrl)
+    .then(res => res.json())
+    .then(osrmData => {
+      if (state.poiRouteLine) {
+        map.removeLayer(state.poiRouteLine);
+      }
+      if (osrmData.code === 'Ok' && osrmData.routes && osrmData.routes[0]) {
+        const coords = osrmData.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
+        state.poiRouteLine = L.polyline(coords, {
+          color: '#facc15',
+          weight: 3,
+          opacity: 0.9,
+          dashArray: '6, 4',
+          lineJoin: 'round'
+        }).addTo(map);
+      } else {
+        state.poiRouteLine = L.polyline([origin, [poi.lat, poi.lon]], {
+          color: '#facc15',
+          weight: 3,
+          opacity: 0.9,
+          dashArray: '6, 4',
+          lineJoin: 'round'
+        }).addTo(map);
+      }
+    })
+    .catch(() => {
+      if (state.poiRouteLine) {
+        map.removeLayer(state.poiRouteLine);
+      }
+      state.poiRouteLine = L.polyline([origin, [poi.lat, poi.lon]], {
+        color: '#facc15',
+        weight: 3,
+        opacity: 0.9,
+        dashArray: '6, 4',
+        lineJoin: 'round'
+      }).addTo(map);
+    });
+
+  const popupContent = `
+    <div>
+      <b>${poi.name || 'POI'}</b>
+      <div><a href="${googleMapsUrl}" target="_blank" rel="noopener">Google Maps</a></div>
+      <div><a href="${appleMapsUrl}" target="_blank" rel="noopener">Apple Maps</a></div>
+    </div>
+  `;
+
+  marker.unbindPopup();
+  marker.bindPopup(popupContent);
+  marker.openPopup();
 }
 
 function calculateDistance(lat1, lon1, lat2, lon2) {
