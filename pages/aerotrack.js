@@ -136,7 +136,7 @@ function persistToLocalStorage(key, value) {
 // Optional POI loader. Kept out of the default init path for now.
 function loadPOIs() {
   if (typeof fetch === 'undefined') return;
-  fetch('../CarCVroom_mangeKartPunkt/data.json')
+  fetch('https://raw.githubusercontent.com/CarCVroom/mangeKartPunkt/main/data.json')
     .then(response => {
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       return response.json();
